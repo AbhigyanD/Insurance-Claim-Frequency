@@ -1,0 +1,25 @@
+seed: 42
+paths:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  figures_dir: reports/figures
+data:
+  base_url: https://raw.githubusercontent.com/dutangc/CASdatasets/master/data
+  files: {freq: freMTPL2freq.rda, sev: freMTPL2sev.rda}
+  id_col: IDpol
+  exposure_col: Exposure
+  claim_count_col: ClaimNb
+  claim_amount_col: ClaimAmount
+  # Exposure above 1 year is a known data error in this dataset; ClaimNb is
+  # capped at 4 and ClaimAmount at the 99.9th pct in the widely used cleaning
+  # of Wüthrich & Merz / Noll et al. We only cap exposure; claims are kept.
+  max_exposure: 1.0
+  min_exposure: 0.0
+features:
+  categorical: [VehBrand, VehGas, Area, Region]
+  numeric: [VehPower, VehAge, DrivAge, BonusMalus, Density]
+split:
+  # Dataset has no date column, so no out-of-time holdout is possible.
+  # Random split stratified on claim indicator, by policy.
+  test_size: 0.20
+  val_size: 0.20

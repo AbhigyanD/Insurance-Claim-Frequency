@@ -1,0 +1,19 @@
+[project]
+name = "insurance-claims-pricing"
+version = "0.1.0"
+description = "Claim frequency, severity and pure-premium modelling on French MTPL data"
+requires-python = ">=3.11"
+dependencies = [
+  "pandas", "numpy", "scikit-learn", "statsmodels", "xgboost", "lightgbm",
+  "shap", "mlflow", "duckdb", "matplotlib", "seaborn", "pyyaml", "pyreadr", "pyarrow", "scipy",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+include = ["src*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
