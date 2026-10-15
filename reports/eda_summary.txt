@@ -1,0 +1,7 @@
+train policies: 406794; zero-claim share: 0.9632
+claim count mean=0.0390 var=0.0433 var/mean=1.109 (>1 suggests overdispersion; note this ignores exposure and covariates, so is only indicative)
+overall frequency per exposure-year: 0.0738
+severity rows=15872 mean=2438 median=1172 p99=16790 p99.9=156057 max=4075401 skew=90.2
+top 0.1% of claims = 25.9% of total claim amount
+val: freq=0.0734 mean exposure=0.529 mean DrivAge=45.50 mean BonusMalus=59.74
+test: freq=0.0741 mean exposure=0.528 mean DrivAge=45.48 mean BonusMalus=59.75

@@ -5,7 +5,7 @@ description = "Claim frequency, severity and pure-premium modelling on French MT
 requires-python = ">=3.11"
 dependencies = [
   "pandas", "numpy", "scikit-learn", "statsmodels", "xgboost", "lightgbm",
-  "shap", "mlflow", "duckdb", "matplotlib", "seaborn", "pyyaml", "pyreadr", "pyarrow", "scipy",
+  "shap", "mlflow", "duckdb", "matplotlib", "seaborn", "pyyaml", "rdata", "pyarrow", "scipy",
 ]
 
 [project.optional-dependencies]
