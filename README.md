@@ -27,6 +27,7 @@ Severity models (actual run, `python -m scripts.train_severity`; trained on clai
 | Constant mean | validation | 1.669 | 2,281 | 2,143 | 2,438 |
 | Gamma GLM (log link) | validation | 1.726 | 2,240 | 2,143 | 2,314 |
 | Gamma GLM, claims capped at train p99.5 | validation | 1.698 | 1,746 | 2,143 | 1,691 |
+| Ridge Gamma GLM (penalty chosen on validation) | validation | 1.664 | 2,187 | 2,143 | 2,310 |
 | LightGBM (gamma objective) | validation | 1.656 | 2,131 | 2,143 | 2,241 |
 
 Honest reading: severity is only weakly predictable from the available features.
@@ -36,7 +37,18 @@ Honest reading: severity is only weakly predictable from the available features.
 - Capping lowers MAE because it predicts a lower mean, but it under-predicts average severity (actual/predicted 1.27), so it would need a large-loss load.
 - RMSE is dominated by a few extreme claims (train RMSE ~37k vs validation ~11.6k because of a single claim of about 4.1M in train).
 - Top-1% validation claims (about a third of total cost) are under-predicted by roughly 24-41x by every model, so a large-loss treatment is needed before pricing use.
-Next steps for severity: a smaller / regularised GLM, bootstrap intervals on deviance differences, and a large-loss/capped component.
+Uncertainty (`reports/severity_bootstrap_vs_constant.csv`, 1,000 bootstrap resamples of validation claims; deviance minus the constant-mean deviance, negative = better):
+
+| Model | Difference | 95% interval | Reliably different? |
+|---|---|---|---|
+| Gamma GLM | +0.057 | [-0.073, +0.182] | No |
+| Gamma GLM, capped p99.5 | +0.030 | [-0.082, +0.148] | No |
+| Ridge Gamma GLM | -0.005 | [-0.031, +0.026] | No |
+| LightGBM | -0.012 | [-0.038, +0.017] | No |
+
+No severity model is distinguishable from a constant mean on validation. The ridge search also chose the largest penalty on its grid (alpha=1.0, a boundary), i.e. the data pull the model toward a constant.
+Practical implication: with these features, differences in expected claims cost across policies will be driven almost entirely by the frequency model; any severity relativities should be treated as unreliable.
+Next step for severity: a large-loss/capped component and possibly a coarser, domain-driven set of severity factors.
 
 Not yet implemented: expected-cost (pure premium) predictions, explainability (SHAP), SQL analytics, MLflow tracking, dashboard exports, notebooks.
 All model results above are validation results used for model selection; no final test-set results have been produced yet.

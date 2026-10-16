@@ -4,7 +4,9 @@ import logging
 import pandas as pd
 
 from src.evaluation.metrics import large_claim_analysis, severity_calibration, severity_summary
-from src.models.severity import ConstantSeverityBaseline, GammaGLM, LightGBMSeverity, claims_table
+from src.evaluation.metrics import gamma_deviance
+from src.evaluation.uncertainty import bootstrap_metric_diff
+from src.models.severity import ConstantSeverityBaseline, GammaGLM, LightGBMSeverity, RidgeGammaGLM, claims_table
 from src.utils.config import ROOT, load_config
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -21,7 +23,10 @@ def main() -> None:
 
     cap_q = cfg["severity"]["cap_quantile"]
     models = {"constant_mean": ConstantSeverityBaseline().fit(tr), "gamma_glm": GammaGLM(cfg).fit(tr),
-              f"gamma_glm_capped_p{cap_q * 100:g}": GammaGLM(cfg, cap_q).fit(tr), "lightgbm_gamma": LightGBMSeverity(cfg).fit(tr, va)}
+              f"gamma_glm_capped_p{cap_q * 100:g}": GammaGLM(cfg, cap_q).fit(tr), "ridge_gamma_glm": RidgeGammaGLM(cfg).fit(tr, va),
+              "lightgbm_gamma": LightGBMSeverity(cfg).fit(tr, va)}
+    log.info("Ridge alpha search (validation gamma deviance): %s; chosen alpha=%s",
+             models["ridge_gamma_glm"].search_, models["ridge_gamma_glm"].alpha_)
     rows = []
     for name, m in models.items():
         for split, d in (("train", tr), ("validation", va)):
@@ -37,6 +42,18 @@ def main() -> None:
     log.info("Large-claim analysis (validation, gamma_glm): %s",
              large_claim_analysis(va["ClaimAmount"].to_numpy(), models["gamma_glm"].predict(va)))
     res.to_csv(ROOT / "reports" / "severity_model_comparison.csv", index=False)
+
+    # Is any model reliably better than the constant mean? Bootstrap validation claims.
+    y, base = va["ClaimAmount"].to_numpy(), models["constant_mean"].predict(va)
+    boot = []
+    for name, m in models.items():
+        if name == "constant_mean":
+            continue
+        r = bootstrap_metric_diff(y, m.predict(va), base, gamma_deviance, n_boot=1000, seed=cfg["seed"])
+        boot.append({"model": name, "metric": "gamma_deviance_minus_constant", **r})
+    boot = pd.DataFrame(boot)
+    log.info("Bootstrap (validation): negative diff = better than constant mean\n%s", boot.round(4).to_string(index=False))
+    boot.to_csv(ROOT / "reports" / "severity_bootstrap_vs_constant.csv", index=False)
 
 
 if __name__ == "__main__":

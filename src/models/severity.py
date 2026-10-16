@@ -74,3 +74,35 @@ class LightGBMSeverity:
 
     def predict(self, df: pd.DataFrame) -> np.ndarray:
         return np.asarray(self.model_.predict(self._x(df)), float)
+
+
+class RidgeGammaGLM:
+    """L2-regularised Gamma GLM (log link) on the same banded design as GammaGLM.
+
+    The penalty is chosen on validation claims from `alphas`; this addresses the overfitting seen in
+    the unpenalised GLM when claim counts are small.
+    """
+
+    def __init__(self, cfg: dict, alphas: tuple[float, ...] = (1e-4, 1e-3, 1e-2, 1e-1, 1.0)):
+        self.cfg, self.alphas = cfg, alphas
+
+    def fit(self, train: pd.DataFrame, val: pd.DataFrame) -> "RidgeGammaGLM":
+        from sklearn.linear_model import GammaRegressor
+        from src.evaluation.metrics import gamma_deviance
+        Xtr = glm_design(train, self.cfg).drop(columns="const")
+        self.columns_ = list(Xtr.columns)
+        Xva = glm_design(val, self.cfg, ["const"] + self.columns_).drop(columns="const")
+        best = None
+        self.search_ = {}
+        for a in self.alphas:
+            m = GammaRegressor(alpha=a, max_iter=1000).fit(Xtr, train["ClaimAmount"])
+            d = gamma_deviance(val["ClaimAmount"], m.predict(Xva))
+            self.search_[a] = d
+            if best is None or d < best[0]:
+                best = (d, a, m)
+        _, self.alpha_, self.model_ = best
+        return self
+
+    def predict(self, df: pd.DataFrame) -> np.ndarray:
+        X = glm_design(df, self.cfg, ["const"] + self.columns_).drop(columns="const")
+        return np.asarray(self.model_.predict(X), float)

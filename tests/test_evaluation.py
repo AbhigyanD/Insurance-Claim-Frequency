@@ -46,3 +46,17 @@ def test_gamma_deviance_known_and_validation():
     cal = severity_calibration(yy, np.full(1000, yy.mean()) * rng.uniform(0.5, 1.5, 1000))
     assert len(cal) == 5 and cal["claims"].sum() == 1000
     assert large_claim_analysis(yy, np.full(1000, yy.mean()))["share_of_total_cost"] > 0.01
+
+
+def test_bootstrap_diff_detects_real_gap_and_not_noise():
+    from src.evaluation.metrics import gamma_deviance
+    from src.evaluation.uncertainty import bootstrap_metric_diff
+    rng = np.random.default_rng(0)
+    mu = rng.uniform(500, 3000, 2000)
+    y = rng.gamma(2.0, mu / 2.0)
+    good = bootstrap_metric_diff(y, mu, np.full(2000, y.mean()), gamma_deviance, n_boot=200)
+    assert good["diff"] < 0 and good["significant"]
+    same = bootstrap_metric_diff(y, mu, mu * 1.0001, gamma_deviance, n_boot=200)
+    assert not same["significant"] or abs(same["diff"]) < 1e-3
+    with pytest.raises(ValueError):
+        bootstrap_metric_diff(y, mu[:10], mu, gamma_deviance)

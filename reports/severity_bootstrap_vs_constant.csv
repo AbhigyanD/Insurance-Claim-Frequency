@@ -1,0 +1,5 @@
+model,metric,diff,ci_low,ci_high,significant
+gamma_glm,gamma_deviance_minus_constant,0.057412409438180045,-0.07247017797256822,0.18241820725750746,False
+gamma_glm_capped_p99.5,gamma_deviance_minus_constant,0.029452155306740613,-0.08229558291561741,0.14765558681624144,False
+ridge_gamma_glm,gamma_deviance_minus_constant,-0.004902198026504712,-0.031128622287500587,0.026022887024995705,False
+lightgbm_gamma,gamma_deviance_minus_constant,-0.012383614477956773,-0.038151228121487205,0.017199189898864705,False
