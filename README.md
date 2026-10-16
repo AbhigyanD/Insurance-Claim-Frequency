@@ -75,7 +75,20 @@ Selected models (fixed in `configs/config.yaml` from validation results, before 
 `python -m scripts.build_database` builds `data/processed/claims.duckdb` (git-ignored) from the processed parquet files and report CSVs using `sql/schema.sql`: tables `policies`, `predictions`, `model_eval_frequency`, `model_eval_severity` and views `v_policy_features_targets`, `v_segment_performance` (actual vs expected loss by predicted risk segment) and `v_model_evaluation` (long-format metrics).
 `python -m scripts.build_database --query sql/analytics.sql` runs the example queries in `sql/analytics.sql` (actual vs expected cost, segment performance, expected annual cost by area and region with sample sizes, driver-age frequency, model metrics). The views are covered by `tests/test_sql.py`.
 
-Not yet implemented: explainability (SHAP), MLflow tracking, dashboard exports, notebooks.
+## Explainability (frequency)
+
+`python -m scripts.explain_models` (SHAP on a 5,000-policy validation sample for the LightGBM frequency model; relativities from the Poisson GLM refit on train). Outputs: `reports/frequency_shap_importance.csv`, `reports/frequency_glm_relativities.csv`, and figures in `reports/figures/`.
+
+Mean |SHAP| on the log claim-rate scale: BonusMalus 0.356 (37% of total), DrivAge 0.118 (12%), Density 0.100, VehAge 0.092, Region 0.083, VehBrand 0.076, VehGas 0.073, VehPower 0.040, Area 0.013.
+
+Poisson GLM rate relativities (95% interval), versus the base level of each factor (youngest driver band 18-21 for age; bonus-malus 100-125 for bonus-malus):
+- Driver age: 25-30 has the lowest rate (0.48, 0.43-0.53); 21-25 and 30-40 are about 0.6; 40+ bands are about 0.8-0.85. Younger drivers have clearly higher claim rates.
+- Bonus-malus: the best bonus band (50) is 0.14 (0.13-0.15) of the base rate, rising steadily with the score to 0.44 for 80-100; the highest malus band (125-150) is 1.30 (1.06-1.61), a wide interval because of few policies.
+- Regular fuel vs diesel: 0.86 (0.83-0.89). Log density has a small effect (1.04, interval just touches 1, p=0.052), and Area carries little extra information beyond density and region (lowest SHAP).
+
+These are statistical associations in observational data, not causal effects. Bonus-malus and driver age partly proxy for each other and for claims history, so importance should not be read as "changing this factor changes risk". The SHAP and GLM views agree on direction, which is reassuring but not proof. No explainability has been done for the severity model: no severity model was reliably better than a constant, so there is nothing meaningful to explain there.
+
+Not yet implemented: MLflow tracking, dashboard exports, notebooks.
 All model results above are validation results used for model selection; no final test-set results have been produced yet.
 
 Data checks and EDA findings (from actual runs, train split only):
@@ -86,5 +99,5 @@ Data checks and EDA findings (from actual runs, train split only):
 - Severity is heavy-tailed: median 1,172, p99.9 156,057, max 4,075,401; the top 0.1% of claims make up 25.9% of total claim amount.
 - Train/val/test frequencies are close (0.0738 / 0.0734 / 0.0741). See `reports/eda_summary.txt` and `reports/figures/`.
 
-Run: `pip install -e .[dev]`, `python -m scripts.prepare_data`, `python -m scripts.run_eda`, `python -m scripts.train_frequency`, `python -m scripts.train_severity`, `python -m scripts.generate_predictions`, `python -m scripts.evaluate_models`, `pytest`.
+Run: `pip install -e .[dev]`, `python -m scripts.prepare_data`, `python -m scripts.run_eda`, `python -m scripts.train_frequency`, `python -m scripts.train_severity`, `python -m scripts.generate_predictions`, `python -m scripts.evaluate_models`, `python -m scripts.build_database`, `python -m scripts.explain_models`, `pytest`.
 See `data/README.md` for dataset source, license and limitations.
