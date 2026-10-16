@@ -34,3 +34,7 @@ selection:
 segments:
   n_segments: 5
   labels: [Very low, Low, Medium, High, Very high]
+mlflow:
+  tracking_uri: sqlite:///data/processed/mlflow.db   # local, git-ignored
+  frequency_experiment: claim-frequency
+  severity_experiment: claim-severity

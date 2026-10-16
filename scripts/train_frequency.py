@@ -7,6 +7,7 @@ import pandas as pd
 from src.evaluation.metrics import frequency_summary, gini, lift_table
 from src.models.frequency import ConstantRateBaseline, LightGBMFrequency, NegBinGLM, PoissonGLM, poisson_log_likelihood
 from src.utils.config import ROOT, load_config
+from src.utils.tracking import dataset_fingerprint, log_run
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("train_frequency")
@@ -43,6 +44,20 @@ def main() -> None:
     log.info("Validation lift (poisson_glm):\n%s", lifts["poisson_glm"].round(4).to_string(index=False))
 
     out = ROOT / "reports"
+    data_hash = dataset_fingerprint(proc / "policies_train.parquet")
+    for name, m in models.items():
+        v = res[(res["model"] == name) & (res["split"] == "validation")].iloc[0].to_dict()
+        t = res[(res["model"] == name) & (res["split"] == "train")].iloc[0].to_dict()
+        params = {"model": name, "features_numeric": cfg["features"]["numeric"], "features_categorical": cfg["features"]["categorical"],
+                  "split": cfg["split"], "train_data_hash": data_hash}
+        if hasattr(m, "params"):
+            params.update(m.params)
+        if hasattr(m, "alpha_"):
+            params["nb_alpha"] = m.alpha_
+        metrics = {f"val_{k}": v[k] for k in ("poisson_deviance", "mae_counts", "actual_to_predicted", "gini")}
+        metrics.update({f"train_{k}": t[k] for k in ("poisson_deviance", "gini")})
+        log_run(cfg, cfg["mlflow"]["frequency_experiment"], name, params, metrics,
+                tags={"selected": str(cfg["selection"]["frequency"] == name)})
     res.to_csv(out / "frequency_model_comparison.csv", index=False)
     for n in ("poisson_glm", "lightgbm_poisson"):
         lifts[n].to_csv(out / f"frequency_lift_validation_{n}.csv", index=False)

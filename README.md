@@ -88,7 +88,11 @@ Poisson GLM rate relativities (95% interval), versus the base level of each fact
 
 These are statistical associations in observational data, not causal effects. Bonus-malus and driver age partly proxy for each other and for claims history, so importance should not be read as "changing this factor changes risk". The SHAP and GLM views agree on direction, which is reassuring but not proof. No explainability has been done for the severity model: no severity model was reliably better than a constant, so there is nothing meaningful to explain there.
 
-Not yet implemented: MLflow tracking, dashboard exports, notebooks.
+## Experiment tracking (MLflow)
+
+`train_frequency` and `train_severity` log one MLflow run per model to a local SQLite store (`data/processed/mlflow.db`, git-ignored; no remote server or credentials): parameters (model hyperparameters, feature lists, split config, NB/ridge alpha), a hash of the training data, train and validation metrics, the seed, and a `selected` tag that marks the model chosen in `configs/config.yaml`. Experiments are `claim-frequency` (4 runs) and `claim-severity` (5 runs). Browse with `mlflow ui --backend-store-uri sqlite:///data/processed/mlflow.db`. Re-running the scripts with the fixed seed reproduced identical report CSVs. Model binaries are not logged to MLflow or committed; `generate_predictions` writes the selected models to `models/` (git-ignored).
+
+Not yet implemented: dashboard exports, notebooks.
 All model results above are validation results used for model selection; no final test-set results have been produced yet.
 
 Data checks and EDA findings (from actual runs, train split only):
