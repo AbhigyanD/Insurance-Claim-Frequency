@@ -26,3 +26,11 @@ split:
 severity:
   # Capping at a TRAIN quantile limits the influence of extreme claims on one model variant.
   cap_quantile: 0.995
+selection:
+  # Fixed from VALIDATION results before any test-set evaluation (see README).
+  frequency: lightgbm_poisson   # lowest validation Poisson deviance, best Gini
+  severity: ridge_gamma_glm     # no severity model reliably beats a constant mean (bootstrap);
+                                # choose the strongly regularised, interpretable one
+segments:
+  n_segments: 5
+  labels: [Very low, Low, Medium, High, Very high]

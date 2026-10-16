@@ -50,7 +50,27 @@ No severity model is distinguishable from a constant mean on validation. The rid
 Practical implication: with these features, differences in expected claims cost across policies will be driven almost entirely by the frequency model; any severity relativities should be treated as unreliable.
 Next step for severity: a large-loss/capped component and possibly a coarser, domain-driven set of severity factors.
 
-Not yet implemented: expected-cost (pure premium) predictions, explainability (SHAP), SQL analytics, MLflow tracking, dashboard exports, notebooks.
+## Expected claims cost (validation)
+
+Selected models (fixed in `configs/config.yaml` from validation results, before any test-set evaluation): LightGBM Poisson for frequency; ridge Gamma GLM for severity (no severity model reliably beat a constant mean, so the most regularised interpretable one is used).
+`python -m scripts.generate_predictions` writes a policy-level table (`data/processed/predictions.parquet`, not committed) with predicted frequency (per exposure-year), predicted severity, expected annual cost (= frequency x severity for a full year), expected cost over the observed exposure, a risk segment (quintiles of predicted annual cost, cut points from train only), and the actual outcomes in separate columns. Outputs that are non-finite or negative raise an error rather than being clipped. Expected claims cost is a pure-premium estimate of losses, not a customer price: expenses, commissions, capital, reinsurance and taxes are not modelled.
+
+`python -m scripts.evaluate_models` (validation only), `reports/segment_performance_validation.csv`:
+
+| Segment | Policies | Frequency actual/expected | Cost actual/expected | Actual pure premium | Expected pure premium |
+|---|---|---|---|---|---|
+| Very low | 27,087 | 1.012 | 1.210 | 101 | 84 |
+| Low | 27,200 | 0.936 | 0.640 | 71 | 111 |
+| Medium | 27,165 | 0.969 | 0.966 | 130 | 135 |
+| High | 27,095 | 0.967 | 0.929 | 167 | 180 |
+| Very high | 27,051 | 1.044 | 0.921 | 367 | 398 |
+
+- Overall validation actual/expected cost is 0.925: expected cost is about 8% too high, because the train mean claim (2,438, inflated by a single ~4.1M claim) is above the validation mean (2,143). This is a severity effect, not a frequency one.
+- Frequency is well calibrated (0.94-1.04) in every segment and in the driver-age, fuel and area groups checked (`reports/stability_by_feature_validation.csv`). Cost actual/expected varies much more by group (about 0.6-1.3) because it rests on few, heavy-tailed claims.
+- The "Very high" segment has about 3.7x the actual pure premium of the "Very low"/"Low" segments, so the model separates risk, but ordering at the low end is not monotone (Low 71 < Very low 101) and should not be over-interpreted.
+- Test-set results have not been produced yet.
+
+Not yet implemented: explainability (SHAP), SQL analytics, MLflow tracking, dashboard exports, notebooks.
 All model results above are validation results used for model selection; no final test-set results have been produced yet.
 
 Data checks and EDA findings (from actual runs, train split only):
@@ -61,5 +81,5 @@ Data checks and EDA findings (from actual runs, train split only):
 - Severity is heavy-tailed: median 1,172, p99.9 156,057, max 4,075,401; the top 0.1% of claims make up 25.9% of total claim amount.
 - Train/val/test frequencies are close (0.0738 / 0.0734 / 0.0741). See `reports/eda_summary.txt` and `reports/figures/`.
 
-Run: `pip install -e .[dev]`, `python -m scripts.prepare_data`, `python -m scripts.run_eda`, `python -m scripts.train_frequency`, `python -m scripts.train_severity`, `pytest`.
+Run: `pip install -e .[dev]`, `python -m scripts.prepare_data`, `python -m scripts.run_eda`, `python -m scripts.train_frequency`, `python -m scripts.train_severity`, `python -m scripts.generate_predictions`, `python -m scripts.evaluate_models`, `pytest`.
 See `data/README.md` for dataset source, license and limitations.
