@@ -70,7 +70,12 @@ Selected models (fixed in `configs/config.yaml` from validation results, before 
 - The "Very high" segment has about 3.7x the actual pure premium of the "Very low"/"Low" segments, so the model separates risk, but ordering at the low end is not monotone (Low 71 < Very low 101) and should not be over-interpreted.
 - Test-set results have not been produced yet.
 
-Not yet implemented: explainability (SHAP), SQL analytics, MLflow tracking, dashboard exports, notebooks.
+## SQL analytics (DuckDB)
+
+`python -m scripts.build_database` builds `data/processed/claims.duckdb` (git-ignored) from the processed parquet files and report CSVs using `sql/schema.sql`: tables `policies`, `predictions`, `model_eval_frequency`, `model_eval_severity` and views `v_policy_features_targets`, `v_segment_performance` (actual vs expected loss by predicted risk segment) and `v_model_evaluation` (long-format metrics).
+`python -m scripts.build_database --query sql/analytics.sql` runs the example queries in `sql/analytics.sql` (actual vs expected cost, segment performance, expected annual cost by area and region with sample sizes, driver-age frequency, model metrics). The views are covered by `tests/test_sql.py`.
+
+Not yet implemented: explainability (SHAP), MLflow tracking, dashboard exports, notebooks.
 All model results above are validation results used for model selection; no final test-set results have been produced yet.
 
 Data checks and EDA findings (from actual runs, train split only):
