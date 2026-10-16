@@ -1,3 +1,7 @@
 {
-  "poisson_glm_pearson_dispersion_train": 1.890018624362508
+  "poisson_glm_pearson_dispersion_train": 1.890018624362508,
+  "poisson_glm_val_loglik": -0.15717257894696293,
+  "negbin_glm_val_loglik": -0.15696830832239222,
+  "nb_alpha": 1.0452617873520282,
+  "negbin_pearson_dispersion_train": 1.8351511755696552
 }

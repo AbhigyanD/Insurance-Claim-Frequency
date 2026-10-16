@@ -44,3 +44,14 @@ def test_invalid_exposure_rejected_at_fit_and_predict(bad):
         PoissonGLM(CFG).fit(broken)
     with pytest.raises(DataValidationError):
         ConstantRateBaseline().fit(tr).predict_counts(broken)
+
+
+def test_negbin_and_lightgbm_predictions_valid_and_scale_with_exposure():
+    from src.models.frequency import LightGBMFrequency, NegBinGLM
+    cfg = {"seed": 1, "features": {"numeric": ["VehPower", "VehAge", "DrivAge", "BonusMalus", "Density"],
+                                   "categorical": ["VehBrand", "VehGas", "Area", "Region"]}}
+    tr, va, te = _toy(seed=0), _toy(seed=2), _toy(seed=1)
+    for m in (NegBinGLM(cfg).fit(tr), LightGBMFrequency(cfg, {"n_estimators": 30}).fit(tr, va)):
+        mu = m.predict_counts(te)
+        assert np.isfinite(mu).all() and (mu >= 0).all()
+        assert np.allclose(m.predict_counts(te.assign(Exposure=te["Exposure"] / 2)), mu / 2)

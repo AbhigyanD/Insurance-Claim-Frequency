@@ -63,3 +63,85 @@ class PoissonGLM:
     def dispersion(self) -> float:
         """Pearson chi2 / residual df. Values clearly above 1 indicate overdispersion."""
         return float(self.result_.pearson_chi2 / self.result_.df_resid)
+
+
+def estimate_nb_alpha(y: np.ndarray, mu: np.ndarray) -> float:
+    """NB2 dispersion alpha (Var = mu + alpha*mu^2) via the Cameron-Trivedi auxiliary regression.
+
+    Regress ((y-mu)^2 - y)/mu on mu with no intercept; the slope estimates alpha. Clipped at a small
+    positive value so the NB family stays defined if the data are not overdispersed.
+    """
+    y, mu = np.asarray(y, float), np.asarray(mu, float)
+    z = ((y - mu) ** 2 - y) / mu
+    alpha = float((mu * z).sum() / (mu * mu).sum())
+    return max(alpha, 1e-6)
+
+
+class NegBinGLM(PoissonGLM):
+    """NB2 GLM, log link, log-exposure offset. Alpha is estimated from a Poisson fit on training data."""
+
+    def fit(self, df: pd.DataFrame) -> "NegBinGLM":
+        super().fit(df)
+        poisson_mu = np.asarray(self.result_.fittedvalues, float)
+        self.alpha_ = estimate_nb_alpha(df["ClaimNb"].to_numpy(), poisson_mu)
+        X = glm_design(df, self.cfg, self.columns_)
+        self.result_ = sm.GLM(df["ClaimNb"].to_numpy(float), X, family=sm.families.NegativeBinomial(alpha=self.alpha_),
+                              offset=np.log(df["Exposure"].to_numpy(float))).fit()
+        return self
+
+    def dispersion(self) -> float:
+        return float(self.result_.pearson_chi2 / self.result_.df_resid)
+
+    def log_likelihood(self, df: pd.DataFrame) -> float:
+        """Mean NB2 log-likelihood per policy under the fitted alpha."""
+        from scipy.special import gammaln
+        mu, y, a = self.predict_counts(df), df["ClaimNb"].to_numpy(float), self.alpha_
+        r = 1.0 / a
+        ll = gammaln(y + r) - gammaln(r) - gammaln(y + 1) + r * np.log(r / (r + mu)) + y * np.log(mu / (r + mu))
+        return float(ll.mean())
+
+
+def poisson_log_likelihood(y: np.ndarray, mu: np.ndarray) -> float:
+    from scipy.special import gammaln
+    y, mu = np.asarray(y, float), np.asarray(mu, float)
+    return float((y * np.log(mu) - mu - gammaln(y + 1)).mean())
+
+
+class LightGBMFrequency:
+    """Gradient-boosted Poisson model; exposure enters as a log offset via init_score.
+
+    The booster models log(rate); predicted counts = exp(raw score) * exposure, so predictions scale
+    exactly with exposure like the GLM. Categorical levels are fixed from training data.
+    """
+
+    def __init__(self, cfg: dict, params: dict | None = None):
+        self.cfg = cfg
+        self.params = {"objective": "poisson", "learning_rate": 0.05, "num_leaves": 16, "min_child_samples": 200,
+                       "subsample": 0.8, "subsample_freq": 1, "colsample_bytree": 0.8, "reg_lambda": 5.0,
+                       "n_estimators": 2000, "random_state": cfg["seed"], "n_jobs": 4, "verbose": -1}
+        self.params.update(params or {})
+
+    def _x(self, df: pd.DataFrame) -> pd.DataFrame:
+        f = self.cfg["features"]
+        x = df[f["numeric"] + f["categorical"]].copy()
+        for c in f["categorical"]:
+            x[c] = pd.Categorical(x[c].astype(str), categories=self.levels_[c])
+        return x
+
+    def fit(self, train: pd.DataFrame, val: pd.DataFrame) -> "LightGBMFrequency":
+        import lightgbm as lgb
+        validate_exposure(train); validate_exposure(val)
+        self.levels_ = {c: sorted(train[c].astype(str).unique()) for c in self.cfg["features"]["categorical"]}
+        self.model_ = lgb.LGBMRegressor(**self.params)
+        self.model_.fit(
+            self._x(train), train["ClaimNb"].to_numpy(float), init_score=np.log(train["Exposure"].to_numpy(float)),
+            eval_set=[(self._x(val), val["ClaimNb"].to_numpy(float))],
+            eval_init_score=[np.log(val["Exposure"].to_numpy(float))],
+            callbacks=[lgb.early_stopping(50, verbose=False)])
+        self.best_iteration_ = int(self.model_.best_iteration_)
+        return self
+
+    def predict_counts(self, df: pd.DataFrame) -> np.ndarray:
+        validate_exposure(df)
+        raw = self.model_.predict(self._x(df), raw_score=True)
+        return np.exp(raw) * df["Exposure"].to_numpy(float)

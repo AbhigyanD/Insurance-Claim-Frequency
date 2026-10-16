@@ -7,19 +7,20 @@ Implemented so far: config, data download/loading from CASdatasets (`freMTPL2fre
 exposure validation, policy-level table, leakage-safe policy-level train/val/test split,
 preprocessing pipeline, EDA script, and unit tests (`pytest`).
 
-Frequency baselines (actual run, `python -m scripts.train_frequency`; fit on train, scored on the validation split only, test untouched):
+Frequency models (actual run, `python -m scripts.train_frequency`; fit on train, scored on the validation split only, test untouched):
 
 | Model | Split | Poisson deviance | MAE (counts) | Actual/Predicted | Gini |
 |---|---|---|---|---|---|
 | Constant rate | validation | 0.2524 | 0.0741 | 0.994 | -0.003 |
 | Poisson GLM (log-exposure offset) | validation | 0.2395 | 0.0725 | 0.995 | 0.303 |
+| Negative Binomial GLM (NB2, offset) | validation | 0.2396 | 0.0727 | 0.990 | 0.303 |
+| LightGBM Poisson (log-exposure init score) | validation | 0.2338 | 0.0717 | 0.997 | 0.339 |
 
-The GLM ranks risk well: the top predicted-risk decile has 2.56x the portfolio frequency and the bottom 0.44x
-(`reports/frequency_lift_validation.csv`), with actual/predicted within about 0.91-1.04 per decile.
-Pearson dispersion of the GLM on train is 1.89, so a Negative Binomial model and a check on how low-exposure
-policies affect that statistic are next. This is not yet a model-selection decision; gradient boosting is still to be compared.
+- LightGBM is best on validation (lower deviance, Gini 0.339 vs 0.303). Its train Gini is 0.378, so there is a train/validation gap (some overfitting); early stopping on validation chose 534 trees.
+- Overdispersion: Poisson GLM Pearson dispersion is 1.89 on train and the estimated NB2 alpha is 1.05. Mean predictions are almost identical to the Poisson GLM, so NB gives no ranking or deviance gain here. Its validation log-likelihood is slightly better (-0.15697 vs -0.15717), which supports overdispersion mainly affecting uncertainty/standard errors rather than point predictions.
+- The Poisson GLM lift table is in `reports/frequency_lift_validation_poisson_glm.csv`; LightGBM's is alongside it. These are validation results used for model selection, not final test results.
 
-Not yet implemented: severity models, frequency gradient boosting, Negative Binomial, pure-premium predictions, explainability,
+Not yet implemented: severity models, pure-premium predictions, explainability,
 SQL analytics, MLflow tracking, dashboard exports. No model results exist yet.
 
 Data checks and EDA findings (from actual runs, train split only):
