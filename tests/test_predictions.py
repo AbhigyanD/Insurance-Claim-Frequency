@@ -55,3 +55,20 @@ def test_negbin_and_lightgbm_predictions_valid_and_scale_with_exposure():
         mu = m.predict_counts(te)
         assert np.isfinite(mu).all() and (mu >= 0).all()
         assert np.allclose(m.predict_counts(te.assign(Exposure=te["Exposure"] / 2)), mu / 2)
+
+
+def test_severity_models_positive_finite_and_exclude_zero_claims():
+    import pytest as _pt
+    from src.models.severity import GammaGLM, LightGBMSeverity, claims_table
+    cfg = {"seed": 1, "features": {"numeric": ["VehPower", "VehAge", "DrivAge", "BonusMalus", "Density"],
+                                   "categorical": ["VehBrand", "VehGas", "Area", "Region"]}}
+    r = np.random.default_rng(3)
+    pol = _toy(2000, seed=0).assign(IDpol=np.arange(2000), TotalClaimAmount=0.0)
+    claims = pd.DataFrame({"IDpol": r.integers(0, 2000, 800), "ClaimAmount": r.gamma(2.0, 1000, 800)})
+    tr = claims_table(pol, claims)
+    assert len(tr) == len(claims) and (tr["ClaimAmount"] > 0).all()
+    with _pt.raises(ValueError):
+        claims_table(pol, claims.assign(ClaimAmount=0.0))
+    for m in (GammaGLM(cfg).fit(tr), GammaGLM(cfg, 0.9).fit(tr), LightGBMSeverity(cfg, {"n_estimators": 20}).fit(tr, tr)):
+        p = m.predict(tr)
+        assert np.isfinite(p).all() and (p > 0).all()

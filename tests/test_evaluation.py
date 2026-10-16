@@ -29,3 +29,20 @@ def test_summary_and_lift_are_consistent():
     assert lt["policies"].sum() == 5000 and len(lt) == 5
     assert lt["actual_freq"].iloc[-1] > lt["actual_freq"].iloc[0]   # ranking is informative
     assert gini(y, mu, e) > 0
+
+
+def test_gamma_deviance_known_and_validation():
+    from src.evaluation.metrics import gamma_deviance, severity_calibration, large_claim_analysis
+    y = np.array([100.0, 200.0, 400.0])
+    assert gamma_deviance(y, y) == pytest.approx(0.0)
+    assert gamma_deviance(np.array([2.0]), np.array([1.0])) == pytest.approx(2 * (1 - np.log(2)))
+    for bad_mu in (np.array([0.0, 1, 1]), np.array([np.nan, 1, 1])):
+        with pytest.raises(ValueError):
+            gamma_deviance(y, bad_mu)
+    with pytest.raises(ValueError):
+        gamma_deviance(np.array([0.0, 1.0, 1.0]), np.ones(3))
+    rng = np.random.default_rng(0)
+    yy = rng.gamma(2.0, 500, 1000)
+    cal = severity_calibration(yy, np.full(1000, yy.mean()) * rng.uniform(0.5, 1.5, 1000))
+    assert len(cal) == 5 and cal["claims"].sum() == 1000
+    assert large_claim_analysis(yy, np.full(1000, yy.mean()))["share_of_total_cost"] > 0.01
