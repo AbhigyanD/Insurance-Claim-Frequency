@@ -92,6 +92,19 @@ These are statistical associations in observational data, not causal effects. Bo
 
 `train_frequency` and `train_severity` log one MLflow run per model to a local SQLite store (`data/processed/mlflow.db`, git-ignored; no remote server or credentials): parameters (model hyperparameters, feature lists, split config, NB/ridge alpha), a hash of the training data, train and validation metrics, the seed, and a `selected` tag that marks the model chosen in `configs/config.yaml`. Experiments are `claim-frequency` (4 runs) and `claim-severity` (5 runs). Browse with `mlflow ui --backend-store-uri sqlite:///data/processed/mlflow.db`. Re-running the scripts with the fixed seed reproduced identical report CSVs. Model binaries are not logged to MLflow or committed; `generate_predictions` writes the selected models to `models/` (git-ignored).
 
+## Modern variants tried (validation only)
+
+`python -m scripts.run_experiments` evaluates four techniques common in current actuarial ML against the selected models. Results are on the validation split; the test split was not read. None changed the model selection.
+
+| Experiment | Result |
+|---|---|
+| Monotone-constrained LightGBM (BonusMalus non-decreasing) | Poisson deviance 0.2358 vs 0.2338 (difference +0.0020, 95% bootstrap interval 0.0016-0.0023); Gini 0.329 vs 0.339. The constraint costs a small but real amount of accuracy; the price of a guaranteed-sensible bonus-malus relativity. |
+| GLM-boosted LightGBM (boosting on a Poisson GLM offset) | Deviance 0.2342 vs 0.2338 (+0.0003, interval 0.0001-0.0006); Gini 0.3365. No gain over plain LightGBM. |
+| Direct Tweedie LightGBM pure-premium model (p = 1.3 / 1.5 / 1.7) | Tweedie deviance 80.3 / 80.1 / 80.3 vs 79.1 for frequency x severity; cost Gini 0.296 / 0.303 / 0.299 vs 0.322. The two-part pipeline wins on both; Tweedie models under-predict aggregate cost (actual/expected 1.06-1.13) where the pipeline over-predicts (0.92). |
+| PSI drift (train vs validation) | All features and predictions below 0.001 (stable). Expected: the splits are random draws from one population and there is no time dimension, so this is a sanity check and a baseline for future monitoring, not evidence about real drift. |
+
+Takeaway: on this data the plain two-part LightGBM x ridge-GLM pipeline is hard to beat with these refinements, and the constraint is an explainability-for-accuracy trade, not a free improvement. Outputs: `reports/frequency_variants_validation.csv`, `reports/pure_premium_variants_validation.csv`, `reports/drift_psi_train_vs_val.csv`.
+
 Not yet implemented: dashboard exports, notebooks.
 All model results above are validation results used for model selection; no final test-set results have been produced yet.
 
@@ -103,5 +116,5 @@ Data checks and EDA findings (from actual runs, train split only):
 - Severity is heavy-tailed: median 1,172, p99.9 156,057, max 4,075,401; the top 0.1% of claims make up 25.9% of total claim amount.
 - Train/val/test frequencies are close (0.0738 / 0.0734 / 0.0741). See `reports/eda_summary.txt` and `reports/figures/`.
 
-Run: `pip install -e .[dev]`, `python -m scripts.prepare_data`, `python -m scripts.run_eda`, `python -m scripts.train_frequency`, `python -m scripts.train_severity`, `python -m scripts.generate_predictions`, `python -m scripts.evaluate_models`, `python -m scripts.build_database`, `python -m scripts.explain_models`, `pytest`.
+Run: `pip install -e .[dev]`, `python -m scripts.prepare_data`, `python -m scripts.run_eda`, `python -m scripts.train_frequency`, `python -m scripts.train_severity`, `python -m scripts.generate_predictions`, `python -m scripts.evaluate_models`, `python -m scripts.build_database`, `python -m scripts.explain_models`, `python -m scripts.run_experiments`, `pytest`.
 See `data/README.md` for dataset source, license and limitations.

@@ -1,0 +1,13 @@
+feature,psi,status,kind
+Region,0.00030057984038865833,stable,feature
+Density,0.00013949088290076398,stable,feature
+Area,0.00010172070732487964,stable,feature
+VehPower,8.300806330202827e-05,stable,feature
+VehBrand,6.66633225686042e-05,stable,feature
+VehAge,5.5942876700259854e-05,stable,feature
+DrivAge,2.613550210967823e-05,stable,feature
+BonusMalus,1.108239716420586e-05,stable,feature
+VehGas,5.028211250394829e-06,stable,feature
+predicted_frequency,9.498033885980738e-05,stable,prediction
+predicted_severity,7.330188706261867e-05,stable,prediction
+predicted_annual_cost,6.451548744764487e-05,stable,prediction
