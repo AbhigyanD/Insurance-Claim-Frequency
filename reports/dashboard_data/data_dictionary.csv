@@ -1,0 +1,50 @@
+table,column,description
+policy_predictions_validation,policy_id,"Policy identifier from the source data (IDpol). Stable, not personal data."
+policy_predictions_validation,risk_segment,Quintile of predicted annual cost; cut points set from training data only.
+policy_predictions_validation,exposure,Policy exposure in years (capped at 1).
+policy_predictions_validation,VehPower,Vehicle power (ordered integer). Model input.
+policy_predictions_validation,VehAge,Vehicle age in years. Model input.
+policy_predictions_validation,DrivAge,Driver age in years. Model input.
+policy_predictions_validation,BonusMalus,"Bonus-malus score (50 best, 100 neutral). Model input."
+policy_predictions_validation,VehBrand,Anonymised vehicle brand group. Model input.
+policy_predictions_validation,VehGas,Diesel or Regular. Model input.
+policy_predictions_validation,Area,Anonymised density-based area code A-F. Model input.
+policy_predictions_validation,Region,French region. Model input.
+policy_predictions_validation,Density,Inhabitants per km2 in the driver's city. Model input.
+policy_predictions_validation,driver_age_band,DrivAge grouped for reporting.
+policy_predictions_validation,vehicle_age_band,VehAge grouped for reporting.
+policy_predictions_validation,predicted_frequency,MODEL PREDICTION: expected claims per exposure-year.
+policy_predictions_validation,predicted_severity,MODEL PREDICTION: expected cost per claim (EUR).
+policy_predictions_validation,predicted_annual_cost,"MODEL PREDICTION: frequency x severity for a full year (EUR). A pure-premium estimate, not a price."
+policy_predictions_validation,predicted_cost_exposure,MODEL PREDICTION: expected cost over the exposure actually observed (EUR).
+policy_predictions_validation,actual_claim_count,HISTORICAL OUTCOME: observed number of claims. Never a model input.
+policy_predictions_validation,actual_claim_amount,HISTORICAL OUTCOME: observed total claim amount (EUR). Never a model input.
+category_summary,dimension,"Grouping used (Risk segment, Driver age, Vehicle age, Area, Region, Brand, Fuel)."
+category_summary,level,Value of the dimension.
+category_summary,policies,Number of policies.
+category_summary,exposure,Exposure-years.
+category_summary,actual_claims,HISTORICAL OUTCOME: observed claims.
+category_summary,expected_claims,MODEL PREDICTION: expected claims over observed exposure.
+category_summary,actual_cost,HISTORICAL OUTCOME: observed claim amount (EUR).
+category_summary,expected_cost,MODEL PREDICTION: expected cost (EUR).
+category_summary,actual_frequency,HISTORICAL OUTCOME: claims per exposure-year.
+category_summary,predicted_frequency,MODEL PREDICTION: claims per exposure-year.
+category_summary,actual_pure_premium,HISTORICAL OUTCOME: cost per exposure-year (EUR).
+category_summary,expected_pure_premium,MODEL PREDICTION: cost per exposure-year (EUR).
+category_summary,cost_actual_to_expected,Actual / expected cost. Noisy for small or heavy-tailed groups; see small_sample.
+category_summary,small_sample,"True if the group has under 1,000 exposure-years; read ratios with care."
+category_summary,data_kind,"historical_outcome (observed), model_prediction (model output) or actual_vs_predicted (both side by side). Simulated data is never mixed in."
+model_metrics,target,frequency or severity.
+model_metrics,model,Model name.
+model_metrics,metric,"Metric name (deviance, MAE, Gini, ...)."
+model_metrics,value,Validation-split value. Lower is better for deviance/MAE/RMSE; higher is better for Gini.
+model_metrics,data_kind,"historical_outcome (observed), model_prediction (model output) or actual_vs_predicted (both side by side). Simulated data is never mixed in."
+predicted_cost_distribution,bin_from,Lower bound of the predicted annual cost bin (EUR).
+predicted_cost_distribution,bin_to,Upper bound (EUR); last bin also holds values above the 99.5th percentile.
+predicted_cost_distribution,policies,Policies in the bin.
+predicted_cost_distribution,data_kind,"historical_outcome (observed), model_prediction (model output) or actual_vs_predicted (both side by side). Simulated data is never mixed in."
+drift_psi,feature,Feature or prediction column.
+drift_psi,psi,"Population stability index, training vs validation."
+drift_psi,status,"stable (<0.1), moderate (0.1-0.25) or major (>0.25)."
+drift_psi,kind,feature or prediction.
+drift_psi,data_kind,"historical_outcome (observed), model_prediction (model output) or actual_vs_predicted (both side by side). Simulated data is never mixed in."
