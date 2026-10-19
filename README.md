@@ -65,7 +65,8 @@ Selected models (fixed in `configs/config.yaml` from validation results, before 
 | High | 27,095 | 0.967 | 0.929 | 167 | 180 |
 | Very high | 27,051 | 1.044 | 0.921 | 367 | 398 |
 
-- Overall validation actual/expected cost is 0.925: expected cost is about 8% too high, because the train mean claim (2,438, inflated by a single ~4.1M claim) is above the validation mean (2,143). This is a severity effect, not a frequency one.
+- Overall validation actual/expected cost is 0.925, but its 95% bootstrap interval is 0.79-1.08, which includes 1.0: the apparent 8% over-prediction is **within sampling noise**, not demonstrated miscalibration. The point estimate is consistent with the train mean claim (2,438, inflated by a single ~4.1M claim) being above the validation mean (2,143), but the data cannot confirm that explanation. Overall frequency A/E is 0.997 (0.969-1.024).
+- Bootstrap intervals by segment (`python -m scripts.segment_uncertainty`, `reports/segment_ae_uncertainty_validation.csv`): only two ratios exclude 1.0. The "Low" segment's cost A/E of 0.640 (0.518-0.807) is a genuine over-prediction of cost; the "Very high" segment's frequency A/E of 1.044 (1.001-1.094) is a borderline under-prediction. Every other segment's frequency and cost ratio is consistent with 1.0, so the earlier segment-level deviations (e.g. Very low cost A/E 1.21) are mostly noise from few heavy-tailed claims (that interval is 0.68-1.95).
 - Frequency is well calibrated (0.94-1.04) in every segment and in the driver-age, fuel and area groups checked (`reports/stability_by_feature_validation.csv`). Cost actual/expected varies much more by group (about 0.6-1.3) because it rests on few, heavy-tailed claims.
 - The "Very high" segment has about 3.7x the actual pure premium of the "Very low"/"Low" segments, so the model separates risk, but ordering at the low end is not monotone (Low 71 < Very low 101) and should not be over-interpreted.
 - Test-set results have not been produced yet.
@@ -120,5 +121,5 @@ Data checks and EDA findings (from actual runs, train split only):
 - Severity is heavy-tailed: median 1,172, p99.9 156,057, max 4,075,401; the top 0.1% of claims make up 25.9% of total claim amount.
 - Train/val/test frequencies are close (0.0738 / 0.0734 / 0.0741). See `reports/eda_summary.txt` and `reports/figures/`.
 
-Run: `pip install -e .[dev]`, `python -m scripts.prepare_data`, `python -m scripts.run_eda`, `python -m scripts.train_frequency`, `python -m scripts.train_severity`, `python -m scripts.generate_predictions`, `python -m scripts.evaluate_models`, `python -m scripts.build_database`, `python -m scripts.explain_models`, `python -m scripts.run_experiments`, `pytest`.
+Run: `pip install -e .[dev]`, `python -m scripts.prepare_data`, `python -m scripts.run_eda`, `python -m scripts.train_frequency`, `python -m scripts.train_severity`, `python -m scripts.generate_predictions`, `python -m scripts.evaluate_models`, `python -m scripts.segment_uncertainty`, `python -m scripts.build_database`, `python -m scripts.explain_models`, `python -m scripts.run_experiments`, `pytest`.
 See `data/README.md` for dataset source, license and limitations.

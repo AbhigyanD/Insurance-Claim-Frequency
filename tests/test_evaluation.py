@@ -60,3 +60,29 @@ def test_bootstrap_diff_detects_real_gap_and_not_noise():
     assert not same["significant"] or abs(same["diff"]) < 1e-3
     with pytest.raises(ValueError):
         bootstrap_metric_diff(y, mu[:10], mu, gamma_deviance)
+
+
+def test_bootstrap_ratio_ci_covers_truth_is_reproducible_and_shrinks_with_n():
+    from src.evaluation.uncertainty import bootstrap_ratio_ci
+    rng = np.random.default_rng(3)
+
+    def sample(n):
+        e = rng.uniform(0.5, 2.0, n)
+        return rng.poisson(e * 0.1).astype(float), e * 0.1          # well calibrated: true A/E = 1
+
+    a, e = sample(4000)
+    r = bootstrap_ratio_ci(a, e, n_boot=300, seed=1)
+    assert r["ci_low"] <= r["ratio"] <= r["ci_high"] and r["contains_one"]
+    assert r == bootstrap_ratio_ci(a, e, n_boot=300, seed=1)                      # reproducible
+    small = bootstrap_ratio_ci(*sample(300), n_boot=300, seed=1)
+    big = bootstrap_ratio_ci(*sample(20000), n_boot=300, seed=1)
+    assert (big["ci_high"] - big["ci_low"]) < (small["ci_high"] - small["ci_low"])  # more data, narrower
+    off = bootstrap_ratio_ci(a, e * 1.5, n_boot=300, seed=1)                      # clearly miscalibrated
+    assert not off["contains_one"] and off["ci_high"] < 1.0
+
+
+@pytest.mark.parametrize("a,e", [([], []), ([1.0], [1.0, 2.0]), ([1.0], [0.0]), ([np.nan], [1.0])])
+def test_bootstrap_ratio_ci_rejects_invalid_input(a, e):
+    from src.evaluation.uncertainty import bootstrap_ratio_ci
+    with pytest.raises(ValueError):
+        bootstrap_ratio_ci(np.array(a), np.array(e))
