@@ -105,6 +105,10 @@ These are statistical associations in observational data, not causal effects. Bo
 
 Takeaway: on this data the plain two-part LightGBM x ridge-GLM pipeline is hard to beat with these refinements, and the constraint is an explainability-for-accuracy trade, not a free improvement. Outputs: `reports/frequency_variants_validation.csv`, `reports/pure_premium_variants_validation.csv`, `reports/drift_psi_train_vs_val.csv`.
 
+## Front-end dashboard (React)
+
+A React dashboard lives in `frontend/` (branch `frontend`): five tabs covering the executive overview, risk analysis, model performance, risk drivers and monitoring. It reads aggregates exported by `python -m scripts.export_frontend_data` (validation split only) and is covered by front-end tests and a CI workflow (`.github/workflows/ci.yml`). See `frontend/README.md`.
+
 Not yet implemented: dashboard exports, notebooks.
 All model results above are validation results used for model selection; no final test-set results have been produced yet.
 
