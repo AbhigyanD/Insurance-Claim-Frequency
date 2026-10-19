@@ -15,10 +15,10 @@ export default function Monitoring({ data }) {
       <Callout kind="warn">{note}</Callout>
       <div className="grid two">
         <Card title="Input feature drift (PSI)" subtitle="Training vs validation. Below 0.1 is stable, 0.1–0.25 moderate, above 0.25 major.">
-          <ThresholdBars data={features} xKey="feature" yKey="psi" yFormat={(v) => fmtNum(v, 3)} thresholds={[{ value: 0.1, label: '0.1' }, { value: 0.25, label: '0.25' }]} height={320} />
+          <ThresholdBars data={features} xKey="feature" yKey="psi" yFormat={(v) => fmtNum(v, 2)} thresholds={[{ value: 0.1, label: '0.1' }, { value: 0.25, label: '0.25' }]} height={320} />
         </Card>
         <Card title="Prediction drift (PSI)" subtitle="Distribution of model outputs, training vs validation">
-          <ThresholdBars data={preds} xKey="feature" yKey="psi" yFormat={(v) => fmtNum(v, 3)} thresholds={[{ value: 0.1, label: '0.1' }, { value: 0.25, label: '0.25' }]} height={320} />
+          <ThresholdBars data={preds} xKey="feature" yKey="psi" yFormat={(v) => fmtNum(v, 2)} thresholds={[{ value: 0.1, label: '0.1' }, { value: 0.25, label: '0.25' }]} height={320} />
         </Card>
       </div>
       <Card title="All PSI values">

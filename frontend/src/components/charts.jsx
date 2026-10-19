@@ -1,6 +1,6 @@
 import React from 'react'
 import {
-  Bar, BarChart, CartesianGrid, Cell, ComposedChart, Legend, Line, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis,
+  Bar, BarChart, CartesianGrid, Cell, ComposedChart, Legend, Line, LabelList, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts'
 
 export const COLORS = {
@@ -23,14 +23,14 @@ export function ActualVsPredictedBars({ data, xKey, actualKey, predictedKey, yFo
         <YAxis {...axis} tickFormatter={yFormat} width={56} />
         <Tooltip {...tip} formatter={(v) => (yFormat ? yFormat(v) : v)} />
         <Legend />
-        <Bar dataKey={actualKey} name={actualName} fill={COLORS.actual} radius={[3, 3, 0, 0]} />
-        <Bar dataKey={predictedKey} name={predictedName} fill={COLORS.predicted} radius={[3, 3, 0, 0]} />
+        <Bar dataKey={actualKey} name={actualName} fill={COLORS.actual} radius={[3, 3, 0, 0]} isAnimationActive={false} />
+        <Bar dataKey={predictedKey} name={predictedName} fill={COLORS.predicted} radius={[3, 3, 0, 0]} isAnimationActive={false} />
       </BarChart>
     </ResponsiveContainer>
   )
 }
 
-export function SingleBars({ data, xKey, yKey, yFormat, height = 280, name, layout = 'horizontal', colorFor }) {
+export function SingleBars({ data, xKey, yKey, yFormat, height = 280, name, layout = 'horizontal', colorFor, baseline }) {
   const vertical = layout === 'vertical'
   return (
     <ResponsiveContainer width="100%" height={height}>
@@ -48,7 +48,8 @@ export function SingleBars({ data, xKey, yKey, yFormat, height = 280, name, layo
           </>
         )}
         <Tooltip {...tip} formatter={(v) => (yFormat ? yFormat(v) : v)} />
-        <Bar dataKey={yKey} name={name} fill={COLORS.predicted} radius={vertical ? [0, 3, 3, 0] : [3, 3, 0, 0]}>
+        {baseline != null && (vertical ? <ReferenceLine x={baseline} stroke={COLORS.warn} strokeDasharray="4 3" /> : <ReferenceLine y={baseline} stroke={COLORS.warn} strokeDasharray="4 3" />)}
+        <Bar dataKey={yKey} name={name} fill={COLORS.predicted} radius={vertical ? [0, 3, 3, 0] : [3, 3, 0, 0]} isAnimationActive={false}>
           {colorFor && data.map((d, i) => <Cell key={i} fill={colorFor(d)} />)}
         </Bar>
       </BarChart>
@@ -66,25 +67,28 @@ export function CalibrationChart({ data, xKey, actualKey, predictedKey, yFormat,
         <YAxis {...axis} tickFormatter={yFormat} width={56} />
         <Tooltip {...tip} formatter={(v) => (yFormat ? yFormat(v) : v)} />
         <Legend />
-        <Line type="monotone" dataKey={actualKey} name="Actual" stroke={COLORS.actual} strokeWidth={2} dot={{ r: 3 }} />
-        <Line type="monotone" dataKey={predictedKey} name="Predicted" stroke={COLORS.predicted} strokeWidth={2} strokeDasharray="5 3" dot={{ r: 3 }} />
+        <Line type="linear" dataKey={actualKey} name="Actual" stroke={COLORS.actual} strokeWidth={2} dot={{ r: 3 }} isAnimationActive={false} />
+        <Line type="linear" dataKey={predictedKey} name="Predicted" stroke={COLORS.predicted} strokeWidth={2} strokeDasharray="5 3" dot={{ r: 3 }} isAnimationActive={false} />
       </ComposedChart>
     </ResponsiveContainer>
   )
 }
 
-export function ThresholdBars({ data, xKey, yKey, thresholds, height = 280, yFormat }) {
+// Fixed axis (0 to `max`) so bars are read against the thresholds, not stretched to fill the width.
+export function ThresholdBars({ data, xKey, yKey, thresholds, height = 280, yFormat, max = 0.3 }) {
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <BarChart data={data} layout="vertical" margin={{ top: 8, right: 24, left: 40, bottom: 4 }}>
+      <BarChart data={data} layout="vertical" margin={{ top: 26, right: 24, left: 40, bottom: 4 }}>
         <CartesianGrid stroke="var(--border)" horizontal={false} />
-        <XAxis type="number" {...axis} domain={[0, 'dataMax']} tickFormatter={yFormat} />
+        <XAxis type="number" {...axis} domain={[0, max]} ticks={[0, 0.1, 0.25, max].filter((v, i, a) => a.indexOf(v) === i)} tickFormatter={yFormat} allowDataOverflow />
         <YAxis type="category" dataKey={xKey} {...axis} width={130} />
         <Tooltip {...tip} formatter={(v) => (yFormat ? yFormat(v) : v)} />
         {thresholds.map((t) => (
           <ReferenceLine key={t.value} x={t.value} stroke={COLORS.warn} strokeDasharray="4 3" label={{ value: t.label, fill: 'var(--muted)', fontSize: 11, position: 'top' }} />
         ))}
-        <Bar dataKey={yKey} fill={COLORS.predicted} radius={[0, 3, 3, 0]} />
+        <Bar dataKey={yKey} fill={COLORS.predicted} radius={[0, 3, 3, 0]} isAnimationActive={false} minPointSize={2}>
+          <LabelList dataKey={yKey} position="right" formatter={(v) => Number(v).toFixed(5)} fill="var(--muted)" fontSize={11} />
+        </Bar>
       </BarChart>
     </ResponsiveContainer>
   )
