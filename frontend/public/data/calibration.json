@@ -1,0 +1,498 @@
+{
+ "frequency_lightgbm": [
+  {
+   "bin": 1,
+   "policies": 10293,
+   "exposure": 7174.755127629313,
+   "claims": 205.0,
+   "expected": 208.37268141426884,
+   "actual_freq": 0.0285724037062343,
+   "predicted_freq": 0.0290424798766783,
+   "actual_to_predicted": 0.983814186238917,
+   "lift_vs_mean": 0.3892998172754666
+  },
+  {
+   "bin": 2,
+   "policies": 11107,
+   "exposure": 7174.829740250018,
+   "claims": 283.0,
+   "expected": 275.5410798501188,
+   "actual_freq": 0.0394434446872516,
+   "predicted_freq": 0.0384038492654903,
+   "actual_to_predicted": 1.0270700839016036,
+   "lift_vs_mean": 0.5374180614041787
+  },
+  {
+   "bin": 3,
+   "policies": 11821,
+   "exposure": 7174.388158544802,
+   "claims": 300.0,
+   "expected": 316.46399076504275,
+   "actual_freq": 0.0418154124603218,
+   "predicted_freq": 0.0441102410089325,
+   "actual_to_predicted": 0.9479751527962422,
+   "lift_vs_mean": 0.569736190117936
+  },
+  {
+   "bin": 4,
+   "policies": 12708,
+   "exposure": 7175.296935399357,
+   "claims": 319.0,
+   "expected": 355.51780154735167,
+   "actual_freq": 0.044458090427758,
+   "predicted_freq": 0.0495474688710655,
+   "actual_to_predicted": 0.8972827763099006,
+   "lift_vs_mean": 0.605742752968521
+  },
+  {
+   "bin": 5,
+   "policies": 13502,
+   "exposure": 7175.169324051201,
+   "claims": 385.0,
+   "expected": 394.5335201661419,
+   "actual_freq": 0.0536572703182736,
+   "predicted_freq": 0.0549859525744798,
+   "actual_to_predicted": 0.9758359691158124,
+   "lift_vs_mean": 0.7310818419468991
+  },
+  {
+   "bin": 6,
+   "policies": 14273,
+   "exposure": 7174.456362751703,
+   "claims": 403.0,
+   "expected": 438.6843004925743,
+   "actual_freq": 0.0561715034036993,
+   "predicted_freq": 0.0611453019311864,
+   "actual_to_predicted": 0.9186560803463758,
+   "lift_vs_mean": 0.7653383396083335
+  },
+  {
+   "bin": 7,
+   "policies": 14768,
+   "exposure": 7175.511819746987,
+   "claims": 485.0,
+   "expected": 495.0162746042847,
+   "actual_freq": 0.0675909972951729,
+   "predicted_freq": 0.0689868941811232,
+   "actual_to_predicted": 0.9797657670704024,
+   "lift_vs_mean": 0.9209292703202268
+  },
+  {
+   "bin": 8,
+   "policies": 15219,
+   "exposure": 7174.964519050827,
+   "claims": 593.0,
+   "expected": 580.9226280820467,
+   "actual_freq": 0.0826484923271018,
+   "predicted_freq": 0.0809652265930503,
+   "actual_to_predicted": 1.020789983612495,
+   "lift_vs_mean": 1.1260880705676528
+  },
+  {
+   "bin": 9,
+   "policies": 15919,
+   "exposure": 7174.962925368665,
+   "claims": 697.0,
+   "expected": 754.8614770274713,
+   "actual_freq": 0.0971433591016341,
+   "predicted_freq": 0.105207718127503,
+   "actual_to_predicted": 0.9233482184634444,
+   "lift_vs_mean": 1.3235810447246168
+  },
+  {
+   "bin": 10,
+   "policies": 15988,
+   "exposure": 7175.065622426829,
+   "claims": 1596.0,
+   "expected": 1460.6095398697855,
+   "actual_freq": 0.222436989985352,
+   "predicted_freq": 0.2035674120253917,
+   "actual_to_predicted": 1.092694492562526,
+   "lift_vs_mean": 3.0307103471909755
+  }
+ ],
+ "frequency_poisson_glm": [
+  {
+   "bin": 1,
+   "policies": 12138,
+   "exposure": 7174.144918032787,
+   "claims": 233.0,
+   "expected": 232.1034453977181,
+   "actual_freq": 0.0324777381363367,
+   "predicted_freq": 0.0323527678977194,
+   "actual_to_predicted": 1.0038627371547442,
+   "lift_vs_mean": 0.4425101105244979
+  },
+  {
+   "bin": 2,
+   "policies": 12208,
+   "exposure": 7175.075974249569,
+   "claims": 280.0,
+   "expected": 292.2697485523771,
+   "actual_freq": 0.0390239770289379,
+   "predicted_freq": 0.0407340284062908,
+   "actual_to_predicted": 0.9580190949862256,
+   "lift_vs_mean": 0.5317028025686449
+  },
+  {
+   "bin": 3,
+   "policies": 12437,
+   "exposure": 7175.263730069616,
+   "claims": 302.0,
+   "expected": 331.0923886740239,
+   "actual_freq": 0.0420890452757016,
+   "predicted_freq": 0.0461435845607324,
+   "actual_to_predicted": 0.9121321127600228,
+   "lift_vs_mean": 0.573464445049623
+  },
+  {
+   "bin": 4,
+   "policies": 12125,
+   "exposure": 7174.881887117299,
+   "claims": 373.0,
+   "expected": 364.2118946094363,
+   "actual_freq": 0.0519869185121683,
+   "predicted_freq": 0.0507620752981856,
+   "actual_to_predicted": 1.0241291004512296,
+   "lift_vs_mean": 0.7083232508396122
+  },
+  {
+   "bin": 5,
+   "policies": 12556,
+   "exposure": 7174.758833745041,
+   "claims": 396.0,
+   "expected": 400.7189161118519,
+   "actual_freq": 0.0551934927955338,
+   "predicted_freq": 0.0558512035592263,
+   "actual_to_predicted": 0.9882238748356598,
+   "lift_vs_mean": 0.7520129171144178
+  },
+  {
+   "bin": 6,
+   "policies": 12765,
+   "exposure": 7174.905441275545,
+   "claims": 432.0,
+   "expected": 442.584274022045,
+   "actual_freq": 0.0602098527340591,
+   "predicted_freq": 0.0616850323177726,
+   "actual_to_predicted": 0.9760852912240668,
+   "lift_vs_mean": 0.8203609646757691
+  },
+  {
+   "bin": 7,
+   "policies": 13518,
+   "exposure": 7174.670566659181,
+   "claims": 505.0,
+   "expected": 503.1278096270905,
+   "actual_freq": 0.0703865069912399,
+   "predicted_freq": 0.0701255625540682,
+   "actual_to_predicted": 1.0037211029426043,
+   "lift_vs_mean": 0.9590181698422936
+  },
+  {
+   "bin": 8,
+   "policies": 14933,
+   "exposure": 7175.671092147616,
+   "claims": 608.0,
+   "expected": 605.6164921955677,
+   "actual_freq": 0.0847307509210307,
+   "predicted_freq": 0.0843985857794259,
+   "actual_to_predicted": 1.0039356718899632,
+   "lift_vs_mean": 1.1544589034339097
+  },
+  {
+   "bin": 9,
+   "policies": 16360,
+   "exposure": 7174.646481772587,
+   "claims": 791.0,
+   "expected": 790.4226919751807,
+   "actual_freq": 0.1102493345155834,
+   "predicted_freq": 0.1101688695022499,
+   "actual_to_predicted": 1.0007303788601725,
+   "lift_vs_mean": 1.5021503343904332
+  },
+  {
+   "bin": 10,
+   "policies": 16558,
+   "exposure": 7175.381610150461,
+   "claims": 1346.0,
+   "expected": 1328.2010219608242,
+   "actual_freq": 0.1875858418590472,
+   "predicted_freq": 0.1851052799870491,
+   "actual_to_predicted": 1.0134008164011945,
+   "lift_vs_mean": 2.5558624577062594
+  }
+ ],
+ "severity_lightgbm": [
+  {
+   "bin": 1,
+   "claims": 1054,
+   "actual_mean": 1789.1489943074005,
+   "predicted_mean": 2113.4200607502366,
+   "actual_to_predicted": 0.8465657289503895
+  },
+  {
+   "bin": 2,
+   "claims": 1053,
+   "actual_mean": 2304.4858499525167,
+   "predicted_mean": 2158.621698883594,
+   "actual_to_predicted": 1.067572817944136
+  },
+  {
+   "bin": 3,
+   "claims": 1053,
+   "actual_mean": 2442.4360683760688,
+   "predicted_mean": 2192.9434803549225,
+   "actual_to_predicted": 1.1137706421785054
+  },
+  {
+   "bin": 4,
+   "claims": 1053,
+   "actual_mean": 1826.9822507122508,
+   "predicted_mean": 2240.223654689595,
+   "actual_to_predicted": 0.8155356483660543
+  },
+  {
+   "bin": 5,
+   "claims": 1053,
+   "actual_mean": 2351.025109211776,
+   "predicted_mean": 2500.219424256939,
+   "actual_to_predicted": 0.9403275114185214
+  }
+ ],
+ "severity_gamma_glm": [
+  {
+   "bin": 1,
+   "claims": 1054,
+   "actual_mean": 1854.2747817836812,
+   "predicted_mean": 1334.405855240421,
+   "actual_to_predicted": 1.3895883134067897
+  },
+  {
+   "bin": 2,
+   "claims": 1053,
+   "actual_mean": 2376.983295346629,
+   "predicted_mean": 1670.8258731262629,
+   "actual_to_predicted": 1.4226397457558415
+  },
+  {
+   "bin": 3,
+   "claims": 1053,
+   "actual_mean": 2253.9533998100665,
+   "predicted_mean": 1913.6994280314548,
+   "actual_to_predicted": 1.1777990664545566
+  },
+  {
+   "bin": 4,
+   "claims": 1053,
+   "actual_mean": 1705.97232668566,
+   "predicted_mean": 2212.335851367868,
+   "actual_to_predicted": 0.7711181490056639
+  },
+  {
+   "bin": 5,
+   "claims": 1053,
+   "actual_mean": 2522.832621082621,
+   "predicted_mean": 4441.949559896951,
+   "actual_to_predicted": 0.5679561613799929
+  }
+ ],
+ "stability": [
+  {
+   "level": "(17, 25]",
+   "policies": 7843,
+   "exposure": 3257.0955086458566,
+   "actual_claims": 458.0,
+   "expected_claims": 486.64142239332807,
+   "actual_cost": 1425904.3,
+   "expected_cost": 1246020.064473315,
+   "frequency_actual_to_expected": 0.9411447092759428,
+   "cost_actual_to_expected": 1.1443670456484352,
+   "actual_pure_premium": 437.7839999517921,
+   "expected_pure_premium": 382.55558093577366,
+   "feature": "DrivAgeBand"
+  },
+  {
+   "level": "(25, 35]",
+   "policies": 29590,
+   "exposure": 13788.087718392097,
+   "actual_claims": 1067.0,
+   "expected_claims": 1033.4655172247608,
+   "actual_cost": 1996806.67,
+   "expected_cost": 2452805.2094685743,
+   "frequency_actual_to_expected": 1.0324485744481264,
+   "cost_actual_to_expected": 0.8140910098738043,
+   "actual_pure_premium": 144.8211463970044,
+   "expected_pure_premium": 177.89306679538657,
+   "feature": "DrivAgeBand"
+  },
+  {
+   "level": "(35, 45]",
+   "policies": 34234,
+   "exposure": 17601.89958604686,
+   "actual_claims": 1264.0,
+   "expected_claims": 1253.8681912057973,
+   "actual_cost": 2526082.13,
+   "expected_cost": 2840914.152643636,
+   "frequency_actual_to_expected": 1.008080441680604,
+   "cost_actual_to_expected": 0.8891793254820226,
+   "actual_pure_premium": 143.5119043630065,
+   "expected_pure_premium": 161.3981569861725,
+   "feature": "DrivAgeBand"
+  },
+  {
+   "level": "(45, 55]",
+   "policies": 32444,
+   "exposure": 17897.88128078449,
+   "actual_claims": 1284.0,
+   "expected_claims": 1323.429026141589,
+   "actual_cost": 2245717.62,
+   "expected_cost": 2944163.691146737,
+   "frequency_actual_to_expected": 0.970206920535404,
+   "cost_actual_to_expected": 0.7627692803742527,
+   "actual_pure_premium": 125.47393653856926,
+   "expected_pure_premium": 164.49788916119627,
+   "feature": "DrivAgeBand"
+  },
+  {
+   "level": "(55, 65]",
+   "policies": 18076,
+   "exposure": 10378.328422037575,
+   "actual_claims": 677.0,
+   "expected_claims": 668.2672738650008,
+   "actual_cost": 1989454.14,
+   "expected_cost": 1499562.432054949,
+   "frequency_actual_to_expected": 1.013067714784973,
+   "cost_actual_to_expected": 1.3266897712779588,
+   "actual_pure_premium": 191.6931184963802,
+   "expected_pure_premium": 144.48978400709927,
+   "feature": "DrivAgeBand"
+  },
+  {
+   "level": "(65, 100]",
+   "policies": 13411,
+   "exposure": 8826.108019312824,
+   "actual_claims": 516.0,
+   "expected_claims": 514.8518629886105,
+   "actual_cost": 1099748.71,
+   "expected_cost": 1217179.498612601,
+   "frequency_actual_to_expected": 1.002230033712464,
+   "cost_actual_to_expected": 0.9035222095455484,
+   "actual_pure_premium": 124.60177323839544,
+   "expected_pure_premium": 137.90670768465932,
+   "feature": "DrivAgeBand"
+  },
+  {
+   "level": "Diesel",
+   "policies": 66523,
+   "exposure": 34106.206455573025,
+   "actual_claims": 2695.0,
+   "expected_claims": 2674.918353054728,
+   "actual_cost": 6387266.96,
+   "expected_cost": 6021778.059485233,
+   "frequency_actual_to_expected": 1.0075073868786832,
+   "cost_actual_to_expected": 1.060694515291719,
+   "actual_pure_premium": 187.27579592647157,
+   "expected_pure_premium": 176.559596779819,
+   "feature": "VehGas"
+  },
+  {
+   "level": "Regular",
+   "policies": 69075,
+   "exposure": 37643.19407964668,
+   "actual_claims": 2571.0,
+   "expected_claims": 2605.6049407643586,
+   "actual_cost": 4896446.61,
+   "expected_cost": 6178866.988914578,
+   "frequency_actual_to_expected": 0.9867190377854416,
+   "cost_actual_to_expected": 0.7924505607232927,
+   "actual_pure_premium": 130.07521624333847,
+   "expected_pure_premium": 164.14300486407006,
+   "feature": "VehGas"
+  },
+  {
+   "level": "A",
+   "policies": 20651,
+   "exposure": 12329.180696159892,
+   "actual_claims": 652.0,
+   "expected_claims": 677.5031086407325,
+   "actual_cost": 2020490.34,
+   "expected_cost": 1684607.4300144296,
+   "frequency_actual_to_expected": 0.9623572079368032,
+   "cost_actual_to_expected": 1.199383490777251,
+   "actual_pure_premium": 163.87871909682627,
+   "expected_pure_premium": 136.6357969381636,
+   "feature": "Area"
+  },
+  {
+   "level": "B",
+   "policies": 14936,
+   "exposure": 8556.331565236918,
+   "actual_claims": 524.0,
+   "expected_claims": 540.2276409878576,
+   "actual_cost": 824886.6,
+   "expected_cost": 1356927.4116354408,
+   "frequency_actual_to_expected": 0.9699614759470956,
+   "cost_actual_to_expected": 0.6079076838795695,
+   "actual_pure_premium": 96.40657257268867,
+   "expected_pure_premium": 158.58752098252384,
+   "feature": "Area"
+  },
+  {
+   "level": "C",
+   "policies": 38809,
+   "exposure": 21174.270330863088,
+   "actual_claims": 1403.0,
+   "expected_claims": 1435.9801830752754,
+   "actual_cost": 2753924.15,
+   "expected_cost": 3285775.003313881,
+   "frequency_actual_to_expected": 0.9770329817472512,
+   "cost_actual_to_expected": 0.8381353401320903,
+   "actual_pure_premium": 130.05993155693062,
+   "expected_pure_premium": 155.1777205056562,
+   "feature": "Area"
+  },
+  {
+   "level": "D",
+   "policies": 30247,
+   "exposure": 15379.311006063328,
+   "actual_claims": 1298.0,
+   "expected_claims": 1283.0452087323806,
+   "actual_cost": 3134027.73,
+   "expected_cost": 2912953.8475467884,
+   "frequency_actual_to_expected": 1.0116557009572518,
+   "cost_actual_to_expected": 1.0758933694192905,
+   "actual_pure_premium": 203.78206336840464,
+   "expected_pure_premium": 189.40730481348285,
+   "feature": "Area"
+  },
+  {
+   "level": "E",
+   "policies": 27340,
+   "exposure": 12673.080725353697,
+   "actual_claims": 1241.0,
+   "expected_claims": 1195.1116519272196,
+   "actual_cost": 2354776.4,
+   "expected_cost": 2649763.166543634,
+   "frequency_actual_to_expected": 1.0383967037713853,
+   "cost_actual_to_expected": 0.8886742897372157,
+   "actual_pure_premium": 185.809311171596,
+   "expected_pure_premium": 209.085953444811,
+   "feature": "Area"
+  },
+  {
+   "level": "F",
+   "policies": 3615,
+   "exposure": 1637.2262115427802,
+   "actual_claims": 148.0,
+   "expected_claims": 148.65550045562148,
+   "actual_cost": 195608.35,
+   "expected_cost": 310618.1893456377,
+   "frequency_actual_to_expected": 0.9955904729148104,
+   "cost_actual_to_expected": 0.6297388778554063,
+   "actual_pure_premium": 119.47545709989312,
+   "expected_pure_premium": 189.7222186865296,
+   "feature": "Area"
+  }
+ ]
+}

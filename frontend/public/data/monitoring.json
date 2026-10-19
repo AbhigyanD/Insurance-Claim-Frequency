@@ -1,0 +1,77 @@
+{
+ "psi": [
+  {
+   "feature": "Region",
+   "psi": 0.0003005798403886,
+   "status": "stable",
+   "kind": "feature"
+  },
+  {
+   "feature": "Density",
+   "psi": 0.0001394908829007,
+   "status": "stable",
+   "kind": "feature"
+  },
+  {
+   "feature": "Area",
+   "psi": 0.0001017207073248,
+   "status": "stable",
+   "kind": "feature"
+  },
+  {
+   "feature": "VehPower",
+   "psi": 8.300806330202827e-05,
+   "status": "stable",
+   "kind": "feature"
+  },
+  {
+   "feature": "VehBrand",
+   "psi": 6.66633225686042e-05,
+   "status": "stable",
+   "kind": "feature"
+  },
+  {
+   "feature": "VehAge",
+   "psi": 5.5942876700259854e-05,
+   "status": "stable",
+   "kind": "feature"
+  },
+  {
+   "feature": "DrivAge",
+   "psi": 2.613550210967823e-05,
+   "status": "stable",
+   "kind": "feature"
+  },
+  {
+   "feature": "BonusMalus",
+   "psi": 1.108239716420586e-05,
+   "status": "stable",
+   "kind": "feature"
+  },
+  {
+   "feature": "VehGas",
+   "psi": 5.028211250394829e-06,
+   "status": "stable",
+   "kind": "feature"
+  },
+  {
+   "feature": "predicted_frequency",
+   "psi": 9.498033885980738e-05,
+   "status": "stable",
+   "kind": "prediction"
+  },
+  {
+   "feature": "predicted_severity",
+   "psi": 7.330188706261867e-05,
+   "status": "stable",
+   "kind": "prediction"
+  },
+  {
+   "feature": "predicted_annual_cost",
+   "psi": 6.451548744764487e-05,
+   "status": "stable",
+   "kind": "prediction"
+  }
+ ],
+ "note": "PSI compares the training split with the validation split. Both are random draws from one population and the dataset has no date column, so values near zero are expected. This is a baseline, not evidence about production drift."
+}
