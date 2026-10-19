@@ -75,19 +75,19 @@ export default function Models({ data }) {
         </p>
       </Card>
 
-      <div className="grid two">
-        <Card title="Frequency variants" subtitle="Difference in Poisson deviance versus the selected LightGBM (positive is worse)">
-          <Table
-            columns={[
-              { key: 'model', label: 'Model', align: 'left', render: prettyModel },
-              { key: 'gini', label: 'Gini', render: (v) => fmtNum(v, 3) },
-              { key: 'dev_diff_vs_lightgbm', label: 'Δ deviance', render: (v) => (v == null ? '–' : fmtNum(v, 4)) },
-              { key: 'significant', label: 'Verdict', render: (v, r) => (r.dev_diff_vs_lightgbm == null ? '' : sigBadge(v, r.dev_diff_vs_lightgbm < 0)) },
-            ]}
-            rows={m.frequency_variants}
-          />
-        </Card>
-        <Card title="Pure premium: two-part vs direct Tweedie" subtitle="Exposure-weighted Tweedie deviance (p=1.5), lower is better">
+      <Card title="Frequency variants" subtitle="Difference in Poisson deviance versus the selected LightGBM (positive is worse)">
+        <Table
+          columns={[
+            { key: 'model', label: 'Model', align: 'left', render: prettyModel },
+            { key: 'gini', label: 'Gini', render: (v) => fmtNum(v, 3) },
+            { key: 'dev_diff_vs_lightgbm', label: 'Δ deviance', render: (v) => (v == null ? '–' : fmtNum(v, 4)) },
+            { key: 'significant', label: 'Verdict', render: (v, r) => (r.dev_diff_vs_lightgbm == null ? '' : sigBadge(v, r.dev_diff_vs_lightgbm < 0)) },
+          ]}
+          rows={m.frequency_variants}
+        />
+      </Card>
+
+      <Card title="Pure premium: two-part vs direct Tweedie" subtitle="Exposure-weighted Tweedie deviance (p=1.5), lower is better">
           <Table
             columns={[
               { key: 'model', label: 'Model', align: 'left', render: prettyModel },
@@ -98,8 +98,7 @@ export default function Models({ data }) {
             rows={m.pure_premium_variants}
             rowClass={(r) => (r.model.includes('selected') ? 'selected' : '')}
           />
-        </Card>
-      </div>
+      </Card>
 
       <Card title="Performance by feature group" subtitle="Actual ÷ expected. Frequency is stable; cost swings because it rests on few, heavy-tailed claims.">
         <Table

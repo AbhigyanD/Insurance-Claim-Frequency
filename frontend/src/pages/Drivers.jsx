@@ -6,10 +6,14 @@ import { fmtNum, fmtPct } from '../format'
 const TERM_LABEL = (t) =>
   t.replace('DrivAge_band_', 'Driver age ').replace('BonusMalus_band_', 'Bonus-malus ').replace('VehGas_Regular', 'Fuel: regular (vs diesel)').replace('LogDensity', 'Log population density')
 
+// Order bands by their numeric lower bound, e.g. "(25, 30]" -> 25 (string order puts (125, 150] first).
+const lowerBound = (term) => Number((term.match(/\((\d+)/) || [])[1])
+const byBand = (a, b) => lowerBound(a.term) - lowerBound(b.term)
+
 export default function Drivers({ data }) {
   const { shap, relativities } = data.explain
-  const age = relativities.filter((r) => r.term.startsWith('DrivAge')).map((r) => ({ ...r, label: TERM_LABEL(r.term) }))
-  const bm = relativities.filter((r) => r.term.startsWith('BonusMalus')).map((r) => ({ ...r, label: TERM_LABEL(r.term) }))
+  const age = relativities.filter((r) => r.term.startsWith('DrivAge')).sort(byBand).map((r) => ({ ...r, label: TERM_LABEL(r.term) }))
+  const bm = relativities.filter((r) => r.term.startsWith('BonusMalus')).sort(byBand).map((r) => ({ ...r, label: TERM_LABEL(r.term) }))
 
   return (
     <>
@@ -25,10 +29,10 @@ export default function Drivers({ data }) {
 
       <div className="grid two">
         <Card title="Driver age: claim-rate relativity" subtitle="Poisson GLM, relative to the youngest band (18–21). 1.0 = same rate.">
-          <SingleBars data={age} xKey="label" yKey="relativity" name="Relativity" layout="vertical" height={300} yFormat={(v) => fmtNum(v, 2)} />
+          <SingleBars data={age} xKey="label" yKey="relativity" name="Relativity" layout="vertical" height={300} baseline={1} yFormat={(v) => fmtNum(v, 2)} />
         </Card>
         <Card title="Bonus-malus: claim-rate relativity" subtitle="Poisson GLM, relative to the 100–125 band.">
-          <SingleBars data={bm} xKey="label" yKey="relativity" name="Relativity" layout="vertical" height={300} yFormat={(v) => fmtNum(v, 2)} />
+          <SingleBars data={bm} xKey="label" yKey="relativity" name="Relativity" layout="vertical" height={300} baseline={1} yFormat={(v) => fmtNum(v, 2)} />
         </Card>
       </div>
 
@@ -39,7 +43,7 @@ export default function Drivers({ data }) {
             { key: 'relativity', label: 'Relativity', render: (v) => fmtNum(v, 3) },
             { key: 'ci', label: '95% interval', render: (_, r) => `${fmtNum(r.ci_low, 3)} to ${fmtNum(r.ci_high, 3)}` },
           ]}
-          rows={relativities.map((r) => ({ ...r, label: TERM_LABEL(r.term) }))}
+          rows={relativities.map((r) => ({ ...r, label: TERM_LABEL(r.term) })).sort((a, b) => a.label.split(' (')[0].localeCompare(b.label.split(' (')[0]) || byBand(a, b))}
         />
       </Card>
     </>
