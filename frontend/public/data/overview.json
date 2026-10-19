@@ -1,4 +1,9 @@
 {
+ "cost_ae_ci_low": 0.7928725655171459,
+ "cost_ae_ci_high": 1.0799090016098143,
+ "freq_ae": 0.9972496487543032,
+ "freq_ae_ci_low": 0.968931724695074,
+ "freq_ae_ci_high": 1.02442702076908,
  "policies": 135598,
  "exposure": 71749.4005352197,
  "actual_claims": 5266.0,

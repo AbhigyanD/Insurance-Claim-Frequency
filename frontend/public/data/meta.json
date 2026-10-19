@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-19T01:09:15+00:00",
+ "generated_at": "2026-10-19T18:03:30+00:00",
  "split": "validation",
  "source": "freMTPL2freq / freMTPL2sev (CASdatasets, French motor third-party liability, ~2011-2013)",
  "note": "All figures come from the validation split used for model selection. The test split is not shown. Expected cost is a pure-premium estimate of claims losses, not a customer price."

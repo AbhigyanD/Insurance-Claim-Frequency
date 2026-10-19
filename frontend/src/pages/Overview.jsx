@@ -8,6 +8,7 @@ export default function Overview({ data }) {
   const freqPred = o.expected_claims / o.exposure
   const freqAct = o.actual_claims / o.exposure
   const gapPct = Math.abs(1 - o.actual_to_expected) * 100
+  const ciIncludesOne = o.cost_ae_ci_low <= 1 && 1 <= o.cost_ae_ci_high
 
   return (
     <>
@@ -24,17 +25,17 @@ export default function Overview({ data }) {
           tone={gapPct > 5 ? 'warn' : undefined}
           label="Actual ÷ expected cost"
           value={fmtNum(o.actual_to_expected, 3)}
-          sub={`actual is ${describeRatio(o.actual_to_expected)} expected`}
+          sub={`actual is ${describeRatio(o.actual_to_expected)} expected; 95% interval ${fmtNum(o.cost_ae_ci_low, 2)}–${fmtNum(o.cost_ae_ci_high, 2)}`}
         />
         <Kpi label="Claim frequency" value={fmtPct(freqAct, 2)} sub={`predicted ${fmtPct(freqPred, 2)} per exposure-year`} />
         <Kpi label="Frequency ranking (Gini)" value={fmtNum(o.frequency_metrics.gini, 3)} sub={prettyModel(o.selected_frequency_model)} />
       </div>
 
       {gapPct > 5 && (
-        <Callout kind="warn">
-          Total expected cost is {gapPct.toFixed(0)}% {o.actual_to_expected < 1 ? 'above' : 'below'} actual cost. Frequency is well calibrated, so
-          the gap comes from severity: the average claim in the training data is inflated by a few very large claims, and severity could not be
-          predicted reliably from the available features.
+        <Callout kind={ciIncludesOne ? 'info' : 'warn'}>
+          Total expected cost is {gapPct.toFixed(0)}% {o.actual_to_expected < 1 ? 'above' : 'below'} actual cost, but the 95% bootstrap interval for actual ÷
+          expected ({fmtNum(o.cost_ae_ci_low, 2)} to {fmtNum(o.cost_ae_ci_high, 2)}) {ciIncludesOne ? 'includes 1.0, so this gap is within sampling noise and does not show a miscalibration' : 'excludes 1.0, so the gap is unlikely to be noise'}.
+          Claim cost rests on few, heavy-tailed claims, so cost ratios are much noisier than frequency ratios (frequency actual ÷ predicted: {fmtNum(o.freq_ae, 3)}, interval {fmtNum(o.freq_ae_ci_low, 3)} to {fmtNum(o.freq_ae_ci_high, 3)}).
         </Callout>
       )}
 

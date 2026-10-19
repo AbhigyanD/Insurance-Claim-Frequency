@@ -40,6 +40,9 @@ describe('App', () => {
     expect(screen.getByText('135,598')).toBeInTheDocument()
     expect(screen.getByText(/validation split/i, { selector: 'strong' })).toBeInTheDocument()
     expect(screen.getByText('0.925')).toBeInTheDocument()
+    // the cost gap is presented with its interval and not attributed to a cause the data cannot confirm
+    expect(screen.getByText(/95% bootstrap interval for actual/i)).toHaveTextContent(/within sampling noise/)
+    expect(screen.queryByText(/the gap comes from severity/i)).not.toBeInTheDocument()
   })
 
   it('switches tabs and shows association-not-causation warning on drivers', async () => {

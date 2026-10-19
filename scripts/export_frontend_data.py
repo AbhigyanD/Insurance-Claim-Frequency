@@ -67,7 +67,10 @@ def main() -> None:
     fsel = fm[(fm["model"] == sel["frequency"]) & (fm["split"] == "validation")].iloc[0]
     ssel = sm[(sm["model"] == sel["severity"]) & (sm["split"] == "validation")].iloc[0]
     exp_claims = float((v["predicted_frequency"] * v["exposure"]).sum())
+    ae = pd.read_csv(rep / "segment_ae_uncertainty_validation.csv").query("segment == 'ALL'").iloc[0]
     dump("overview", {
+        "cost_ae_ci_low": ae["cost_ci_low"], "cost_ae_ci_high": ae["cost_ci_high"],
+        "freq_ae": ae["freq_ae"], "freq_ae_ci_low": ae["freq_ci_low"], "freq_ae_ci_high": ae["freq_ci_high"],
         "policies": len(v), "exposure": v["exposure"].sum(), "actual_claims": v["actual_claim_count"].sum(),
         "expected_claims": exp_claims, "actual_cost": v["actual_claim_amount"].sum(),
         "expected_cost": v["predicted_cost_exposure"].sum(),
