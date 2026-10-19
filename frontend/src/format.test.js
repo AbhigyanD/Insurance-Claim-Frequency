@@ -11,6 +11,19 @@ describe('format helpers', () => {
     for (const f of [fmtInt, fmtMoney, fmtMoneyCompact, fmtNum, fmtPct]) expect(f(null)).toBe('–')
   })
 
+  it('formats compact euros deterministically, including rounding boundaries and negatives', () => {
+    expect(fmtMoneyCompact(11283713)).toBe('€11.3M')
+    expect(fmtMoneyCompact(1.2e9)).toBe('€1.2B')
+    expect(fmtMoneyCompact(2500)).toBe('€2.5K')
+    expect(fmtMoneyCompact(999)).toBe('€999')
+    expect(fmtMoneyCompact(0)).toBe('€0')
+    expect(fmtMoneyCompact(999999)).toBe('€1.0M')      // not €1000.0K
+    expect(fmtMoneyCompact(949999)).toBe('€950.0K')
+    expect(fmtMoneyCompact(-11283713)).toBe('-€11.3M')
+    expect(fmtMoneyCompact(Infinity)).toBe('–')
+    expect(fmtMoneyCompact(NaN)).toBe('–')
+  })
+
   it('describes actual/expected ratios in plain language', () => {
     expect(describeRatio(0.92)).toBe('8% below')
     expect(describeRatio(1.25)).toBe('25% above')

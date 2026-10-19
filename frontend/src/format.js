@@ -3,8 +3,21 @@ const nf = (opts) => new Intl.NumberFormat('en-GB', opts)
 
 export const fmtInt = (v) => (v == null ? '–' : nf({ maximumFractionDigits: 0 }).format(v))
 export const fmtMoney = (v) => (v == null ? '–' : '€' + nf({ maximumFractionDigits: 0 }).format(v))
-export const fmtMoneyCompact = (v) =>
-  v == null ? '–' : '€' + nf({ notation: 'compact', maximumFractionDigits: 1 }).format(v)
+// Compact euros (K / M / B). Done by hand rather than with Intl's compact notation, whose symbols
+// ("M" vs "m") depend on the ICU data of the runtime and so differ between Node versions and browsers.
+const COMPACT_UNITS = [[1e9, 'B'], [1e6, 'M'], [1e3, 'K']]
+export function fmtMoneyCompact(v) {
+  if (v == null || !Number.isFinite(v)) return '–'
+  const abs = Math.abs(v)
+  const sign = v < 0 ? '-' : ''
+  let i = COMPACT_UNITS.findIndex(([unit]) => abs >= unit)
+  if (i === -1) return `${sign}€${Math.round(abs)}`
+  // if rounding would print 1000.0 of this unit (e.g. 999,999 -> 1000.0K), step up one unit instead
+  if (i > 0 && Math.round((abs / COMPACT_UNITS[i][0]) * 10) / 10 >= 1000) i -= 1
+  const [unit, suffix] = COMPACT_UNITS[i]
+  return `${sign}€${(abs / unit).toFixed(1)}${suffix}`
+}
+
 export const fmtNum = (v, d = 3) => (v == null ? '–' : Number(v).toFixed(d))
 export const fmtPct = (v, d = 1) => (v == null ? '–' : (v * 100).toFixed(d) + '%')
 
