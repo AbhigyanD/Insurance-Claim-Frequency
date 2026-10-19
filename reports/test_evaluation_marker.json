@@ -1,0 +1,7 @@
+{
+  "evaluated_at": "2026-10-19T18:00:46+00:00",
+  "selected_frequency": "lightgbm_poisson",
+  "selected_severity": "ridge_gamma_glm",
+  "test_policies": 135599,
+  "test_claims": 5306
+}

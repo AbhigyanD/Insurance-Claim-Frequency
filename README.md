@@ -66,10 +66,10 @@ Selected models (fixed in `configs/config.yaml` from validation results, before 
 | Very high | 27,051 | 1.044 | 0.921 | 367 | 398 |
 
 - Overall validation actual/expected cost is 0.925, but its 95% bootstrap interval is 0.79-1.08, which includes 1.0: the apparent 8% over-prediction is **within sampling noise**, not demonstrated miscalibration. The point estimate is consistent with the train mean claim (2,438, inflated by a single ~4.1M claim) being above the validation mean (2,143), but the data cannot confirm that explanation. Overall frequency A/E is 0.997 (0.969-1.024).
-- Bootstrap intervals by segment (`python -m scripts.segment_uncertainty`, `python -m scripts.large_loss_analysis`, `reports/segment_ae_uncertainty_validation.csv`): only two ratios exclude 1.0. The "Low" segment's cost A/E of 0.640 (0.518-0.807) is a genuine over-prediction of cost; the "Very high" segment's frequency A/E of 1.044 (1.001-1.094) is a borderline under-prediction. Every other segment's frequency and cost ratio is consistent with 1.0, so the earlier segment-level deviations (e.g. Very low cost A/E 1.21) are mostly noise from few heavy-tailed claims (that interval is 0.68-1.95).
+- Bootstrap intervals by segment (`python -m scripts.segment_uncertainty`, `python -m scripts.large_loss_analysis`, `python -m scripts.evaluate_test` (once), `reports/segment_ae_uncertainty_validation.csv`): only two ratios exclude 1.0. The "Low" segment's cost A/E of 0.640 (0.518-0.807) is a genuine over-prediction of cost; the "Very high" segment's frequency A/E of 1.044 (1.001-1.094) is a borderline under-prediction. Every other segment's frequency and cost ratio is consistent with 1.0, so the earlier segment-level deviations (e.g. Very low cost A/E 1.21) are mostly noise from few heavy-tailed claims (that interval is 0.68-1.95).
 - Frequency is well calibrated (0.94-1.04) in every segment and in the driver-age, fuel and area groups checked (`reports/stability_by_feature_validation.csv`). Cost actual/expected varies much more by group (about 0.6-1.3) because it rests on few, heavy-tailed claims.
 - The "Very high" segment has about 3.7x the actual pure premium of the "Very low"/"Low" segments, so the model separates risk, but ordering at the low end is not monotone (Low 71 < Very low 101) and should not be over-interpreted.
-- Test-set results have not been produced yet.
+- Final test-set results are in the next section.
 
 ## SQL analytics (DuckDB)
 
@@ -110,6 +110,24 @@ Takeaway: on this data the plain two-part LightGBM x ridge-GLM pipeline is hard 
 
 A React dashboard lives in `frontend/` (branch `frontend`): five tabs covering the executive overview, risk analysis, model performance, risk drivers and monitoring. It reads aggregates exported by `python -m scripts.export_frontend_data` (validation split only) and is covered by front-end tests and a CI workflow (`.github/workflows/ci.yml`). See `frontend/README.md`.
 
+## Final test-set results
+
+`python -m scripts.evaluate_test` was run **once**, after the model choice was fixed in `configs/config.yaml` from validation results (`src/evaluation/holdout_guard.py` records the use in `reports/test_evaluation_marker.json` and refuses a second run without `--force`). Models were fitted on train; baselines were refit on train; nothing was tuned on the test set. Disclosure: before this run I saw one test aggregate (cost actual/expected 0.813) in an early SQL query; no model or selection was changed because of it. Outputs: `reports/test_results.csv`, `reports/test_segment_performance.csv`.
+
+**Frequency** (135,599 test policies; bootstrap intervals for the deviance difference of the selected model minus the comparison, negative = selected is better):
+
+| Model | Poisson deviance | Gini | Actual/predicted | Selected model's deviance difference (95% interval) |
+|---|---|---|---|---|
+| Constant rate | 0.2529 | 0.002 | 1.003 | -0.0155 (-0.0172 to -0.0140) |
+| Poisson GLM | 0.2412 | 0.288 | 1.003 | -0.0038 (-0.0049 to -0.0030) |
+| LightGBM Poisson (selected) | 0.2374 | 0.321 | 1.004 | |
+
+LightGBM is reliably better than both baselines on held-out data. Its Gini (0.321) is below the validation figure (0.339), the usual optimism from selecting on validation. Overall frequency A/E is 1.004 (0.977-1.033) and every risk segment's frequency interval includes 1.0, so frequency is well calibrated.
+
+**Severity** (test claims): ridge Gamma GLM deviance 1.4351 vs constant mean 1.4677; difference -0.0326 (-0.0476 to -0.0149). The selected model is reliably better than the constant on this sample, unlike on validation. Caution: its predicted mean (2,305) is lower than the constant's (2,438) and closer to the test mean (1,871), so part of the gain reflects a lower overall level rather than better risk ranking; the two cannot be separated from these numbers.
+
+**Expected cost: a real weakness.** Overall test cost A/E is **0.813 (0.734-0.900)**; the interval excludes 1.0. Expected pure premium is 170 per exposure-year vs 139 actual, about 19% too high. Frequency is calibrated (A/E 1.004), so the gap is the severity level: predicted mean severity 2,305 vs actual 1,871 on test claims. Validation showed the same direction (0.925, interval including 1.0), and train the opposite (A/E 1.055): the training claims contain one ~4.1M claim, which inflates the severity level the model learns, so the overall level is driven by one claim and is not stable across samples. By segment, cost A/E is below 1.0 in all five segments (Very low 0.61, Low 0.81, Medium 0.89, High 0.80, Very high 0.86) with Very low, Low and High excluding 1.0. These expected costs should not be used as pricing levels without fixing the severity level (see the large-loss section); the **relative** ranking of risk is the part supported by the evidence.
+
 ## Large-loss treatment (cap and load)
 
 `python -m scripts.large_loss_analysis` (fit on train, validation only; `reports/large_loss_analysis_validation.csv`) models severity on claims capped at a train quantile, then multiplies by a portfolio-wide load for the excess above the cap (`src/models/large_loss.py`).
@@ -125,7 +143,7 @@ A React dashboard lives in `frontend/` (branch `frontend`): five tabs covering t
 - The load is **unstable**: one ~4.1M claim contributes 30-50% of the total excess, and dropping it would cut the load by roughly a third or more. I did not drop it (that would be tuning on an outcome); the practical conclusion is that a large-loss load estimated from this sample is unreliable and would need credibility weighting, a fitted tail distribution (e.g. Pareto) or reinsurance-style treatment before pricing use. The model selection is unchanged.
 
 Not yet implemented: dashboard exports, notebooks.
-All model results above are validation results used for model selection; no final test-set results have been produced yet.
+All model results above are validation results used for model selection; final test-set results are reported in their own section.
 
 Data checks and EDA findings (from actual runs, train split only):
 - 677,991 policies, no missing values or duplicate ids; 1,224 have exposure > 1 (capped at 1).
@@ -135,5 +153,5 @@ Data checks and EDA findings (from actual runs, train split only):
 - Severity is heavy-tailed: median 1,172, p99.9 156,057, max 4,075,401; the top 0.1% of claims make up 25.9% of total claim amount.
 - Train/val/test frequencies are close (0.0738 / 0.0734 / 0.0741). See `reports/eda_summary.txt` and `reports/figures/`.
 
-Run: `pip install -e .[dev]`, `python -m scripts.prepare_data`, `python -m scripts.run_eda`, `python -m scripts.train_frequency`, `python -m scripts.train_severity`, `python -m scripts.generate_predictions`, `python -m scripts.evaluate_models`, `python -m scripts.segment_uncertainty`, `python -m scripts.large_loss_analysis`, `python -m scripts.build_database`, `python -m scripts.explain_models`, `python -m scripts.run_experiments`, `pytest`.
+Run: `pip install -e .[dev]`, `python -m scripts.prepare_data`, `python -m scripts.run_eda`, `python -m scripts.train_frequency`, `python -m scripts.train_severity`, `python -m scripts.generate_predictions`, `python -m scripts.evaluate_models`, `python -m scripts.segment_uncertainty`, `python -m scripts.large_loss_analysis`, `python -m scripts.evaluate_test` (once), `python -m scripts.build_database`, `python -m scripts.explain_models`, `python -m scripts.run_experiments`, `pytest`.
 See `data/README.md` for dataset source, license and limitations.
