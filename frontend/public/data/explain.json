@@ -1,0 +1,163 @@
+{
+ "shap": [
+  {
+   "feature": "BonusMalus",
+   "mean_abs_shap": 0.3558824408278738,
+   "share_of_total": 0.3744214311086624
+  },
+  {
+   "feature": "DrivAge",
+   "mean_abs_shap": 0.1177339297945082,
+   "share_of_total": 0.1238670454804127
+  },
+  {
+   "feature": "Density",
+   "mean_abs_shap": 0.0995902461740784,
+   "share_of_total": 0.1047782026284277
+  },
+  {
+   "feature": "VehAge",
+   "mean_abs_shap": 0.092236944455794,
+   "share_of_total": 0.0970418452337525
+  },
+  {
+   "feature": "Region",
+   "mean_abs_shap": 0.0832069898979732,
+   "share_of_total": 0.0875414930935334
+  },
+  {
+   "feature": "VehBrand",
+   "mean_abs_shap": 0.0757556744181849,
+   "share_of_total": 0.0797020161047436
+  },
+  {
+   "feature": "VehGas",
+   "mean_abs_shap": 0.07334459345393,
+   "share_of_total": 0.0771653346571984
+  },
+  {
+   "feature": "VehPower",
+   "mean_abs_shap": 0.0401566932125896,
+   "share_of_total": 0.0422485765419413
+  },
+  {
+   "feature": "Area",
+   "mean_abs_shap": 0.0125787881194715,
+   "share_of_total": 0.0132340551513276
+  }
+ ],
+ "relativities": [
+  {
+   "term": "LogDensity",
+   "relativity": 1.0378671742250571,
+   "ci_low": 0.999701198612442,
+   "ci_high": 1.0774902269087858,
+   "p_value": 0.0518555865032948
+  },
+  {
+   "term": "DrivAge_band_(21, 25]",
+   "relativity": 0.604947523747715,
+   "ci_low": 0.5442504967176645,
+   "ci_high": 0.6724137298828016,
+   "p_value": 1.19692557298059e-20
+  },
+  {
+   "term": "DrivAge_band_(25, 30]",
+   "relativity": 0.4805859326075377,
+   "ci_low": 0.4344219598522268,
+   "ci_high": 0.5316555330186835,
+   "p_value": 6.800001142097218e-46
+  },
+  {
+   "term": "DrivAge_band_(30, 40]",
+   "relativity": 0.5941833753490379,
+   "ci_low": 0.5402868438586969,
+   "ci_high": 0.6534563770231486,
+   "p_value": 7.358676350694646e-27
+  },
+  {
+   "term": "DrivAge_band_(40, 50]",
+   "relativity": 0.8538057978528842,
+   "ci_low": 0.775559354831145,
+   "ci_high": 0.9399465507136006,
+   "p_value": 0.001269341811689
+  },
+  {
+   "term": "DrivAge_band_(50, 60]",
+   "relativity": 0.8321464991062436,
+   "ci_low": 0.7542667864492127,
+   "ci_high": 0.9180674642120192,
+   "p_value": 0.0002472848625258
+  },
+  {
+   "term": "DrivAge_band_(60, 70]",
+   "relativity": 0.79619179722872,
+   "ci_low": 0.7161149604641767,
+   "ci_high": 0.8852229222573418,
+   "p_value": 2.506349506865362e-05
+  },
+  {
+   "term": "DrivAge_band_(70, 120]",
+   "relativity": 0.7850558835651635,
+   "ci_low": 0.7013569527485597,
+   "ci_high": 0.8787433245011703,
+   "p_value": 2.58544678535281e-05
+  },
+  {
+   "term": "BonusMalus_band_(125, 150]",
+   "relativity": 1.30358612391241,
+   "ci_low": 1.055468550137243,
+   "ci_high": 1.6100307131235845,
+   "p_value": 0.0138509413248527
+  },
+  {
+   "term": "BonusMalus_band_(49, 50]",
+   "relativity": 0.1382026471100177,
+   "ci_low": 0.1267193546782763,
+   "ci_high": 0.1507265540982938,
+   "p_value": 0.0
+  },
+  {
+   "term": "BonusMalus_band_(50, 55]",
+   "relativity": 0.1987393877095125,
+   "ci_low": 0.1793420565485441,
+   "ci_high": 0.2202347011475293,
+   "p_value": 8.648369584481406e-209
+  },
+  {
+   "term": "BonusMalus_band_(55, 60]",
+   "relativity": 0.2523409964329194,
+   "ci_low": 0.2284266794855967,
+   "ci_high": 0.2787589375468452,
+   "p_value": 8.4080389579843e-162
+  },
+  {
+   "term": "BonusMalus_band_(60, 70]",
+   "relativity": 0.3563582705053751,
+   "ci_low": 0.324793020724478,
+   "ci_high": 0.3909912124168111,
+   "p_value": 2.106307446944298e-105
+  },
+  {
+   "term": "BonusMalus_band_(70, 80]",
+   "relativity": 0.3435693010795312,
+   "ci_low": 0.3132359522357233,
+   "ci_high": 0.3768400906785041,
+   "p_value": 1.2730701910261212e-113
+  },
+  {
+   "term": "BonusMalus_band_(80, 100]",
+   "relativity": 0.4412051347877321,
+   "ci_low": 0.4044229072918293,
+   "ci_high": 0.4813327026072582,
+   "p_value": 8.533549357672241e-76
+  },
+  {
+   "term": "VehGas_Regular",
+   "relativity": 0.8618417961750376,
+   "ci_low": 0.8331507678878461,
+   "ci_high": 0.8915208510426563,
+   "p_value": 7.487528290984609e-18
+  }
+ ]
+}

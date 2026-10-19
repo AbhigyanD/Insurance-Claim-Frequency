@@ -1,0 +1,67 @@
+[
+ {
+  "risk_segment": "Very low",
+  "policies": 27087,
+  "exposure": 17437.466827606855,
+  "actual_claims": 634.0,
+  "expected_claims": 626.5853515211827,
+  "actual_cost": 1762922.7,
+  "expected_cost": 1456494.1807730154,
+  "frequency_actual_to_expected": 1.0118334213540363,
+  "cost_actual_to_expected": 1.2103877401448673,
+  "actual_pure_premium": 101.09970200539422,
+  "expected_pure_premium": 83.5267068991412
+ },
+ {
+  "risk_segment": "Low",
+  "policies": 27200,
+  "exposure": 15326.691586945131,
+  "actual_claims": 715.0,
+  "expected_claims": 763.6074870658113,
+  "actual_cost": 1088465.86,
+  "expected_cost": 1702046.9923748032,
+  "frequency_actual_to_expected": 0.9363449312779956,
+  "cost_actual_to_expected": 0.6395040001106573,
+  "actual_pure_premium": 71.0176657385816,
+  "expected_pure_premium": 111.0511673520306
+ },
+ {
+  "risk_segment": "Medium",
+  "policies": 27165,
+  "exposure": 13966.75494722659,
+  "actual_claims": 832.0,
+  "expected_claims": 858.9581282818937,
+  "actual_cost": 1815534.55,
+  "expected_cost": 1879259.2418703968,
+  "frequency_actual_to_expected": 0.9686153173312232,
+  "cost_actual_to_expected": 0.966090526282594,
+  "actual_pure_premium": 129.98971893328127,
+  "expected_pure_premium": 134.55231719688513
+ },
+ {
+  "risk_segment": "High",
+  "policies": 27095,
+  "exposure": 12808.992373680663,
+  "actual_claims": 992.0,
+  "expected_claims": 1025.861964309053,
+  "actual_cost": 2136278.65,
+  "expected_cost": 2299891.0250082933,
+  "frequency_actual_to_expected": 0.966991695289278,
+  "cost_actual_to_expected": 0.9288608141737048,
+  "actual_pure_premium": 166.77960199192,
+  "expected_pure_premium": 179.55284521318046
+ },
+ {
+  "risk_segment": "Very high",
+  "policies": 27051,
+  "exposure": 12209.49479976046,
+  "actual_claims": 2093.0,
+  "expected_claims": 2005.510362641146,
+  "actual_cost": 4480511.81,
+  "expected_cost": 4862953.608373303,
+  "frequency_actual_to_expected": 1.0436246249277092,
+  "cost_actual_to_expected": 0.9213560668736808,
+  "actual_pure_premium": 366.9694679003347,
+  "expected_pure_premium": 398.2927785405756
+ }
+]

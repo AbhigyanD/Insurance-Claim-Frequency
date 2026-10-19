@@ -1,0 +1,23 @@
+{
+ "policies": 135598,
+ "exposure": 71749.4005352197,
+ "actual_claims": 5266.0,
+ "expected_claims": 5280.523293819087,
+ "actual_cost": 11283713.57,
+ "expected_cost": 12200645.048399813,
+ "actual_to_expected": 0.9248456557204675,
+ "selected_frequency_model": "lightgbm_poisson",
+ "selected_severity_model": "ridge_gamma_glm",
+ "frequency_metrics": {
+  "poisson_deviance": 0.233839087837748,
+  "mae_counts": 0.0717127206864807,
+  "actual_to_predicted": 0.9972496487543032,
+  "gini": 0.3392471640587678
+ },
+ "severity_metrics": {
+  "gamma_deviance": 1.6637024921131285,
+  "mae": 2187.345862961787,
+  "rmse": 11579.185879689609,
+  "actual_to_predicted": 0.9276272314665176
+ }
+}
