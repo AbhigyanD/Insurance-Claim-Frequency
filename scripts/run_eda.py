@@ -2,6 +2,7 @@
 import logging
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
@@ -51,22 +52,32 @@ def main() -> None:
         log.info(ln)
 
     fig, ax = plt.subplots(1, 3, figsize=(15, 4))
-    train["Exposure"].hist(bins=50, ax=ax[0]); ax[0].set_title("Exposure (years)")
-    train["ClaimNb"].value_counts().sort_index().plot.bar(ax=ax[1], logy=True); ax[1].set_title("Claim count (log scale)")
-    np.log10(sev["ClaimAmount"]).hist(bins=60, ax=ax[2]); ax[2].set_title("log10 claim amount")
-    fig.tight_layout(); fig.savefig(figs / "eda_distributions.png", dpi=110); plt.close(fig)
+    train["Exposure"].hist(bins=50, ax=ax[0])
+    ax[0].set_title("Exposure (years)")
+    train["ClaimNb"].value_counts().sort_index().plot.bar(ax=ax[1], logy=True)
+    ax[1].set_title("Claim count (log scale)")
+    np.log10(sev["ClaimAmount"]).hist(bins=60, ax=ax[2])
+    ax[2].set_title("log10 claim amount")
+    fig.tight_layout()
+    fig.savefig(figs / "eda_distributions.png", dpi=110)
+    plt.close(fig)
 
     tmp = train.assign(DrivAgeBand=pd.cut(train.DrivAge, [17, 25, 35, 45, 55, 65, 100]),
                        VehAgeBand=pd.cut(train.VehAge, [-1, 2, 5, 10, 15, 100]),
                        BonusMalusBand=pd.cut(train.BonusMalus, [49, 50, 60, 80, 100, 150, 400]))
     cols = ["DrivAgeBand", "VehAgeBand", "BonusMalusBand", "VehBrand", "VehGas", "Area", "Region"]
-    fig, axes = plt.subplots(2, 4, figsize=(20, 8)); axes = axes.ravel()
+    fig, axes = plt.subplots(2, 4, figsize=(20, 8))
+    axes = axes.ravel()
     for a, c in zip(axes, cols):
         r = rate_by(tmp, c)
-        r["frequency"].plot.bar(ax=a); a.set_title(f"Frequency by {c}"); a.set_xlabel("")
+        r["frequency"].plot.bar(ax=a)
+        a.set_title(f"Frequency by {c}")
+        a.set_xlabel("")
         a.axhline(train.ClaimNb.sum() / train.Exposure.sum(), color="r", ls="--", lw=1)
     axes[-1].axis("off")
-    fig.tight_layout(); fig.savefig(figs / "eda_frequency_by_feature.png", dpi=110); plt.close(fig)
+    fig.tight_layout()
+    fig.savefig(figs / "eda_frequency_by_feature.png", dpi=110)
+    plt.close(fig)
     log.info("Figures written to %s", figs)
 
 

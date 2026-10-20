@@ -2,8 +2,16 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.reporting.dashboard_export import (DATA_DICTIONARY, category_summary, dictionary_frame, distribution_table,
-                                            export_all, model_metrics_long, policy_table, validate_tables)
+from src.reporting.dashboard_export import (
+    DATA_DICTIONARY,
+    category_summary,
+    dictionary_frame,
+    distribution_table,
+    export_all,
+    model_metrics_long,
+    policy_table,
+    validate_tables,
+)
 
 
 def _pred(n=400, seed=0, split="val"):

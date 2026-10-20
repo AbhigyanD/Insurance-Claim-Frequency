@@ -9,7 +9,13 @@ import logging
 import pandas as pd
 
 from src.evaluation.holdout_guard import check_unused, record_use
-from src.evaluation.metrics import frequency_summary, gamma_deviance, gini, poisson_deviance, severity_summary
+from src.evaluation.metrics import (
+    frequency_summary,
+    gamma_deviance,
+    gini,
+    poisson_deviance,
+    severity_summary,
+)
 from src.evaluation.uncertainty import bootstrap_metric_diff, bootstrap_ratio_ci
 from src.models.frequency import ConstantRateBaseline, PoissonGLM
 from src.models.severity import ConstantSeverityBaseline, claims_table
@@ -83,7 +89,7 @@ def main() -> None:
     seg.to_csv(ROOT / "reports" / "test_segment_performance.csv", index=False)
 
     record_use(marker, {"selected_frequency": cfg["selection"]["frequency"], "selected_severity": cfg["selection"]["severity"],
-                        "test_policies": int(len(test)), "test_claims": int(len(tclaims))})
+                        "test_policies": len(test), "test_claims": len(tclaims)})
 
 
 if __name__ == "__main__":

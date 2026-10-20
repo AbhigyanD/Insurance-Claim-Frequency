@@ -1,6 +1,6 @@
 """Policy-level modelling table, leakage-safe split and preprocessing pipeline."""
 from __future__ import annotations
-import numpy as np
+
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split

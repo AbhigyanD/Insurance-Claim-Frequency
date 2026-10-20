@@ -32,7 +32,11 @@ def test_summary_and_lift_are_consistent():
 
 
 def test_gamma_deviance_known_and_validation():
-    from src.evaluation.metrics import gamma_deviance, severity_calibration, large_claim_analysis
+    from src.evaluation.metrics import (
+        gamma_deviance,
+        large_claim_analysis,
+        severity_calibration,
+    )
     y = np.array([100.0, 200.0, 400.0])
     assert gamma_deviance(y, y) == pytest.approx(0.0)
     assert gamma_deviance(np.array([2.0]), np.array([1.0])) == pytest.approx(2 * (1 - np.log(2)))

@@ -1,5 +1,6 @@
 """Severity models. Trained ONLY on claims with a positive amount (one row per claim)."""
 from __future__ import annotations
+
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
@@ -16,7 +17,7 @@ def claims_table(policies: pd.DataFrame, claims: pd.DataFrame, id_col: str = "ID
 
 
 class ConstantSeverityBaseline:
-    def fit(self, df: pd.DataFrame) -> "ConstantSeverityBaseline":
+    def fit(self, df: pd.DataFrame) -> ConstantSeverityBaseline:
         self.mean_ = float(df["ClaimAmount"].mean())
         return self
 
@@ -31,7 +32,7 @@ class GammaGLM:
     def __init__(self, cfg: dict, cap_quantile: float | None = None):
         self.cfg, self.cap_quantile = cfg, cap_quantile
 
-    def fit(self, df: pd.DataFrame) -> "GammaGLM":
+    def fit(self, df: pd.DataFrame) -> GammaGLM:
         y = df["ClaimAmount"].to_numpy(float)
         if self.cap_quantile is not None:
             self.cap_ = float(np.quantile(y, self.cap_quantile))
@@ -62,7 +63,7 @@ class LightGBMSeverity:
             x[c] = pd.Categorical(x[c].astype(str), categories=self.levels_[c])
         return x
 
-    def fit(self, train: pd.DataFrame, val: pd.DataFrame) -> "LightGBMSeverity":
+    def fit(self, train: pd.DataFrame, val: pd.DataFrame) -> LightGBMSeverity:
         import lightgbm as lgb
         self.levels_ = {c: sorted(train[c].astype(str).unique()) for c in self.cfg["features"]["categorical"]}
         self.model_ = lgb.LGBMRegressor(**self.params)
@@ -86,8 +87,9 @@ class RidgeGammaGLM:
     def __init__(self, cfg: dict, alphas: tuple[float, ...] = (1e-4, 1e-3, 1e-2, 1e-1, 1.0)):
         self.cfg, self.alphas = cfg, alphas
 
-    def fit(self, train: pd.DataFrame, val: pd.DataFrame) -> "RidgeGammaGLM":
+    def fit(self, train: pd.DataFrame, val: pd.DataFrame) -> RidgeGammaGLM:
         from sklearn.linear_model import GammaRegressor
+
         from src.evaluation.metrics import gamma_deviance
         Xtr = glm_design(train, self.cfg).drop(columns="const")
         self.columns_ = list(Xtr.columns)

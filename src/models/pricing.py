@@ -1,5 +1,6 @@
 """Combine frequency and severity into expected claims cost (pure premium, not a final price)."""
 from __future__ import annotations
+
 import numpy as np
 import pandas as pd
 

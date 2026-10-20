@@ -1,5 +1,6 @@
 """Modern GBM variants for frequency: monotone-constrained and GLM-boosted models."""
 from __future__ import annotations
+
 import numpy as np
 import pandas as pd
 
@@ -37,9 +38,10 @@ class GLMBoostedFrequency:
         self.gbm_ = LightGBMFrequency(cfg, {"learning_rate": 0.03, "num_leaves": 8, "min_child_samples": 500,
                                             "reg_lambda": 20.0, **(params or {})})
 
-    def fit(self, train: pd.DataFrame, val: pd.DataFrame) -> "GLMBoostedFrequency":
+    def fit(self, train: pd.DataFrame, val: pd.DataFrame) -> GLMBoostedFrequency:
         import lightgbm as lgb
-        validate_exposure(train); validate_exposure(val)
+        validate_exposure(train)
+        validate_exposure(val)
         self.glm_.fit(train)
         g = self.gbm_
         g.levels_ = {c: sorted(train[c].astype(str).unique()) for c in self.cfg["features"]["categorical"]}

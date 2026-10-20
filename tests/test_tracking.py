@@ -16,5 +16,6 @@ def test_log_run_records_params_metrics_and_tags(tmp_path):
 
 def test_dataset_fingerprint_changes_with_content(tmp_path):
     a, b = tmp_path / "a", tmp_path / "b"
-    a.write_bytes(b"1"); b.write_bytes(b"2")
+    a.write_bytes(b"1")
+    b.write_bytes(b"2")
     assert dataset_fingerprint(a) != dataset_fingerprint(b) and dataset_fingerprint(a) == dataset_fingerprint(a)

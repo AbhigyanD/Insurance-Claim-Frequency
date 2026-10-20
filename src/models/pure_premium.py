@@ -1,5 +1,6 @@
 """Direct Tweedie pure-premium model: one model for loss cost per exposure-year."""
 from __future__ import annotations
+
 import numpy as np
 import pandas as pd
 
@@ -29,11 +30,14 @@ class TweedieLightGBM:
             x[c] = pd.Categorical(x[c].astype(str), categories=self.levels_[c])
         return x
 
-    def fit(self, train: pd.DataFrame, val: pd.DataFrame) -> "TweedieLightGBM":
+    def fit(self, train: pd.DataFrame, val: pd.DataFrame) -> TweedieLightGBM:
         import lightgbm as lgb
-        validate_exposure(train); validate_exposure(val)
+        validate_exposure(train)
+        validate_exposure(val)
         self.levels_ = {c: sorted(train[c].astype(str).unique()) for c in self.cfg["features"]["categorical"]}
-        rate = lambda d: d["TotalClaimAmount"].to_numpy(float) / d["Exposure"].to_numpy(float)
+        def rate(d: pd.DataFrame) -> np.ndarray:
+            return d["TotalClaimAmount"].to_numpy(float) / d["Exposure"].to_numpy(float)
+
         self.model_ = lgb.LGBMRegressor(**self.params)
         self.model_.fit(self._x(train), rate(train), sample_weight=train["Exposure"].to_numpy(float),
                         eval_set=[(self._x(val), rate(val))], eval_sample_weight=[val["Exposure"].to_numpy(float)],

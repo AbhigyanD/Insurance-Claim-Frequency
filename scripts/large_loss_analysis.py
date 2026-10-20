@@ -1,12 +1,11 @@
 """Cap-and-load analysis. Fit on TRAIN, evaluate on VALIDATION only; the test split is not read."""
 import logging
 
-import numpy as np
 import pandas as pd
 
 from src.evaluation.metrics import severity_summary
 from src.evaluation.uncertainty import bootstrap_ratio_ci
-from src.models.large_loss import cap_threshold, excess_load, load_sensitivity
+from src.models.large_loss import cap_threshold, load_sensitivity
 from src.models.severity import GammaGLM, claims_table
 from src.utils.config import ROOT, load_config
 

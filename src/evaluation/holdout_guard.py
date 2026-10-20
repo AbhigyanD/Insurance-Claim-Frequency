@@ -1,7 +1,8 @@
 """Protect the held-out test set: it should be evaluated once, after model selection is final."""
 from __future__ import annotations
+
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 
@@ -21,4 +22,4 @@ def check_unused(marker: Path, force: bool = False) -> None:
 def record_use(marker: Path, info: dict) -> None:
     marker = Path(marker)
     marker.parent.mkdir(parents=True, exist_ok=True)
-    marker.write_text(json.dumps({"evaluated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), **info}, indent=2))
+    marker.write_text(json.dumps({"evaluated_at": datetime.now(UTC).isoformat(timespec="seconds"), **info}, indent=2))

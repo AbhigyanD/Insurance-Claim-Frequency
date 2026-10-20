@@ -1,5 +1,6 @@
 """Business insights report generated from the actual result tables (no hand-typed numbers)."""
 from __future__ import annotations
+
 import pandas as pd
 
 REQUIRED = ["test_results", "test_segments", "val_segment_ae", "lift", "shap", "relativities", "severity_bootstrap", "large_loss", "val_freq"]
@@ -37,7 +38,7 @@ def render_insights(t: dict[str, pd.DataFrame]) -> str:
     top, bottom = lift.iloc[-1], lift.iloc[0]
     shap = t["shap"].sort_values("mean_abs_shap", ascending=False)
     age_ratio, age_label, _ = _band_ratio(t["relativities"], "DrivAge_band")
-    bm_ratio, bm_label, bm_rel = _band_ratio(t["relativities"], "BonusMalus_band")
+    _, bm_label, bm_rel = _band_ratio(t["relativities"], "BonusMalus_band")
     sb = t["severity_bootstrap"]
     n_sev_sig = int(sb["significant"].sum())
     ll = t["large_loss"]

@@ -1,5 +1,6 @@
 """Large-loss treatment: model capped severity, then load for the excess above the cap."""
 from __future__ import annotations
+
 import numpy as np
 
 

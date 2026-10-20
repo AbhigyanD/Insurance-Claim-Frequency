@@ -4,7 +4,7 @@ No policy-level rows and no test-split figures are exported.
 """
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import numpy as np
 import pandas as pd
@@ -115,7 +115,7 @@ def main() -> None:
                      "relativities": rel[rel["term"].str.startswith(("DrivAge_band", "BonusMalus_band", "VehGas", "LogDensity"))]})
     dump("monitoring", {"psi": pd.read_csv(rep / "drift_psi_train_vs_val.csv"),
                         "note": "PSI compares the training split with the validation split. Both are random draws from one population and the dataset has no date column, so values near zero are expected. This is a baseline, not evidence about production drift."})
-    dump("meta", {"generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "split": "validation",
+    dump("meta", {"generated_at": datetime.now(UTC).isoformat(timespec="seconds"), "split": "validation",
                   "source": "freMTPL2freq / freMTPL2sev (CASdatasets, French motor third-party liability, ~2011-2013)",
                   "note": "All figures come from the validation split used for model selection. The test split is not shown. Expected cost is a pure-premium estimate of claims losses, not a customer price."})
     log.info("Wrote %d JSON files to %s", len(list(OUT.glob("*.json"))), OUT)

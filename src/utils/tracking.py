@@ -1,6 +1,8 @@
 """Thin MLflow helper. Local SQLite tracking store; no credentials or remote servers involved."""
 from __future__ import annotations
+
 import hashlib
+import math
 from pathlib import Path
 
 import mlflow
@@ -29,7 +31,7 @@ def log_run(cfg: dict, experiment: str, run_name: str, params: dict, metrics: di
     _setup(cfg, experiment)
     with mlflow.start_run(run_name=run_name) as run:
         mlflow.log_params({k: str(v)[:250] for k, v in params.items()})
-        mlflow.log_metrics({k: float(v) for k, v in metrics.items() if v == v})
+        mlflow.log_metrics({k: float(v) for k, v in metrics.items() if not math.isnan(float(v))})
         mlflow.set_tags({"seed": str(cfg["seed"]), **(tags or {})})
         for a in artifacts or []:
             if Path(a).exists():

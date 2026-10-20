@@ -3,10 +3,20 @@ import logging
 
 import pandas as pd
 
-from src.evaluation.metrics import large_claim_analysis, severity_calibration, severity_summary
-from src.evaluation.metrics import gamma_deviance
+from src.evaluation.metrics import (
+    gamma_deviance,
+    large_claim_analysis,
+    severity_calibration,
+    severity_summary,
+)
 from src.evaluation.uncertainty import bootstrap_metric_diff
-from src.models.severity import ConstantSeverityBaseline, GammaGLM, LightGBMSeverity, RidgeGammaGLM, claims_table
+from src.models.severity import (
+    ConstantSeverityBaseline,
+    GammaGLM,
+    LightGBMSeverity,
+    RidgeGammaGLM,
+    claims_table,
+)
 from src.utils.config import ROOT, load_config
 from src.utils.tracking import dataset_fingerprint, log_run
 

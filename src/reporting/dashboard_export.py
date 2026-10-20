@@ -4,6 +4,7 @@ Every table carries a `data_kind` column so historical outcomes, model predictio
 simulated examples can be told apart in a report.
 """
 from __future__ import annotations
+
 from pathlib import Path
 
 import numpy as np

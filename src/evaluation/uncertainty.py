@@ -1,5 +1,6 @@
 """Bootstrap uncertainty for metric differences between two models on the same rows."""
 from __future__ import annotations
+
 import numpy as np
 
 

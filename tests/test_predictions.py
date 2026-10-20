@@ -39,7 +39,8 @@ def test_inference_schema_matches_training_even_with_unseen_category():
 @pytest.mark.parametrize("bad", [0.0, -1.0, np.nan])
 def test_invalid_exposure_rejected_at_fit_and_predict(bad):
     tr = _toy()
-    broken = tr.copy(); broken.loc[broken.index[0], "Exposure"] = bad
+    broken = tr.copy()
+    broken.loc[broken.index[0], "Exposure"] = bad
     with pytest.raises(DataValidationError):
         PoissonGLM(CFG).fit(broken)
     with pytest.raises(DataValidationError):
@@ -59,6 +60,7 @@ def test_negbin_and_lightgbm_predictions_valid_and_scale_with_exposure():
 
 def test_severity_models_positive_finite_and_exclude_zero_claims():
     import pytest as _pt
+
     from src.models.severity import GammaGLM, LightGBMSeverity, claims_table
     cfg = {"seed": 1, "features": {"numeric": ["VehPower", "VehAge", "DrivAge", "BonusMalus", "Density"],
                                    "categorical": ["VehBrand", "VehGas", "Area", "Region"]}}

@@ -4,6 +4,7 @@ import logging
 
 import joblib
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
@@ -34,14 +35,22 @@ def main() -> None:
     log.info("SHAP importance (log-rate scale):\n%s", imp.round(4).to_string(index=False))
     fig, ax = plt.subplots(figsize=(6, 4))
     imp.iloc[::-1].plot.barh(x="feature", y="mean_abs_shap", ax=ax, legend=False)
-    ax.set_xlabel("mean |SHAP| (log claim rate)"); ax.set_title("Frequency model: feature importance (association only)")
-    fig.tight_layout(); fig.savefig(figs / "frequency_shap_importance.png", dpi=110); plt.close(fig)
+    ax.set_xlabel("mean |SHAP| (log claim rate)")
+    ax.set_title("Frequency model: feature importance (association only)")
+    fig.tight_layout()
+    fig.savefig(figs / "frequency_shap_importance.png", dpi=110)
+    plt.close(fig)
     for f in ("BonusMalus", "DrivAge"):
         i = list(X.columns).index(f)
         fig, ax = plt.subplots(figsize=(5, 3.5))
-        ax.scatter(X[f], sv[:, i], s=3, alpha=0.4); ax.axhline(0, color="k", lw=0.5)
-        ax.set_xlabel(f); ax.set_ylabel("SHAP (log rate)"); ax.set_title(f"SHAP dependence: {f}")
-        fig.tight_layout(); fig.savefig(figs / f"frequency_shap_dependence_{f}.png", dpi=110); plt.close(fig)
+        ax.scatter(X[f], sv[:, i], s=3, alpha=0.4)
+        ax.axhline(0, color="k", lw=0.5)
+        ax.set_xlabel(f)
+        ax.set_ylabel("SHAP (log rate)")
+        ax.set_title(f"SHAP dependence: {f}")
+        fig.tight_layout()
+        fig.savefig(figs / f"frequency_shap_dependence_{f}.png", dpi=110)
+        plt.close(fig)
 
     # --- Poisson GLM relativities with 95% intervals ---
     glm = PoissonGLM(cfg).fit(train)

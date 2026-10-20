@@ -1,5 +1,6 @@
 """Frequency models. Targets are claim COUNTS; exposure enters as a log offset (or sample weight)."""
 from __future__ import annotations
+
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
@@ -10,7 +11,7 @@ from src.data.validate import validate_exposure
 class ConstantRateBaseline:
     """Predicts the portfolio-wide claim rate per exposure-year (training data only)."""
 
-    def fit(self, df: pd.DataFrame) -> "ConstantRateBaseline":
+    def fit(self, df: pd.DataFrame) -> ConstantRateBaseline:
         self.rate_ = float(df["ClaimNb"].sum() / df["Exposure"].sum())
         return self
 
@@ -46,7 +47,7 @@ class PoissonGLM:
     def __init__(self, cfg: dict):
         self.cfg = cfg
 
-    def fit(self, df: pd.DataFrame) -> "PoissonGLM":
+    def fit(self, df: pd.DataFrame) -> PoissonGLM:
         validate_exposure(df)
         X = glm_design(df, self.cfg)
         self.columns_ = list(X.columns)
@@ -80,7 +81,7 @@ def estimate_nb_alpha(y: np.ndarray, mu: np.ndarray) -> float:
 class NegBinGLM(PoissonGLM):
     """NB2 GLM, log link, log-exposure offset. Alpha is estimated from a Poisson fit on training data."""
 
-    def fit(self, df: pd.DataFrame) -> "NegBinGLM":
+    def fit(self, df: pd.DataFrame) -> NegBinGLM:
         super().fit(df)
         poisson_mu = np.asarray(self.result_.fittedvalues, float)
         self.alpha_ = estimate_nb_alpha(df["ClaimNb"].to_numpy(), poisson_mu)
@@ -128,9 +129,10 @@ class LightGBMFrequency:
             x[c] = pd.Categorical(x[c].astype(str), categories=self.levels_[c])
         return x
 
-    def fit(self, train: pd.DataFrame, val: pd.DataFrame) -> "LightGBMFrequency":
+    def fit(self, train: pd.DataFrame, val: pd.DataFrame) -> LightGBMFrequency:
         import lightgbm as lgb
-        validate_exposure(train); validate_exposure(val)
+        validate_exposure(train)
+        validate_exposure(val)
         self.levels_ = {c: sorted(train[c].astype(str).unique()) for c in self.cfg["features"]["categorical"]}
         self.model_ = lgb.LGBMRegressor(**self.params)
         self.model_.fit(

@@ -25,7 +25,7 @@ def main() -> None:
     build(con, str(ROOT / cfg["paths"]["processed_dir"]), str(ROOT / "reports"))
     log.info("Built %s with tables: %s", db, [r[0] for r in con.execute("SHOW TABLES").fetchall()])
     if a.query:
-        text = "\n".join(l for l in (ROOT / a.query).read_text().splitlines() if not l.strip().startswith("--"))
+        text = "\n".join(line for line in (ROOT / a.query).read_text().splitlines() if not line.strip().startswith("--"))
         for body in (st.strip() for st in text.split(";")):
             if body:
                 print(con.execute(body).df().to_string(index=False), "\n")

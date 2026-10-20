@@ -1,5 +1,6 @@
 """Download and load the freMTPL2 frequency / severity datasets (CASdatasets, GPL >= 2)."""
 from __future__ import annotations
+
 import logging
 import urllib.request
 from pathlib import Path
