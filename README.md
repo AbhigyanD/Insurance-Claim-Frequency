@@ -1,11 +1,119 @@
-# Insurance-Claim-Frequency
-Build a model that predicts claim frequency and claim severity, then combines them to estimate expected annual claims cost.  Models: GLM with Poisson or Tweedie distributions, LightGBM/CatBoost, XGBoost.  Evaluation: MAE, deviance, calibration, lift by risk segment, and temporal holdout performance.  
+# Insurance claim frequency, severity and expected-cost modelling
 
-## Status (work in progress)
+A traditional machine-learning and actuarial pricing project on real French motor third-party liability data (`freMTPL2freq` / `freMTPL2sev` from the CASdatasets package). It predicts **claim frequency** (exposure-aware), **claim severity** (on claims only) and combines them into **expected annual claims cost**, compares classical GLMs with gradient boosting, explains the drivers, and exports results to SQL, MLflow, a React dashboard and Power BI-ready tables. No LLM or generative component is used.
 
-Implemented so far: config, data download/loading from CASdatasets (`freMTPL2freq`/`freMTPL2sev`),
-exposure validation, policy-level table, leakage-safe policy-level train/val/test split,
-preprocessing pipeline, EDA script, and unit tests (`pytest`).
+## Headline results (held-out test set, evaluated once)
+
+| Question | Result |
+|---|---|
+| Does the frequency model rank risk? | Yes. LightGBM Poisson: deviance 0.2374 vs 0.2412 (Poisson GLM) and 0.2529 (flat rate); Gini 0.321 vs 0.288 vs 0.002. The gain over the GLM is statistically reliable (difference -0.0038, 95% interval -0.0049 to -0.0030). |
+| Is frequency calibrated? | Yes. Overall actual/predicted 1.004 (0.977-1.033); every risk segment's interval includes 1.0. |
+| Is the expected cost *level* reliable? | **No.** Actual/expected cost is 0.813 (0.734-0.900): expected cost is about 23% above actual. Frequency is fine, so the gap is the severity level, which one ~4.1M claim in the training data inflates. |
+| Can severity be predicted from the features? | Weakly at best. No severity model was reliably better than a constant on validation; on test the selected model is better, but partly through a lower overall level rather than demonstrated ranking skill. |
+
+**Use the model to rank and compare risks. Do not use its absolute cost level for pricing without fixing the severity level.** Full detail, with uncertainty, is in `reports/business_insights.md` and the sections below. Expected claims cost is a pure-premium estimate of losses, not a customer price (expenses, commissions, capital, reinsurance and taxes are out of scope).
+
+## Architecture
+
+```mermaid
+flowchart LR
+    A["CASdatasets .rda files"] --> B["prepare_data: load, validate, policy table, split"]
+    B --> C[("train / validation / test parquet")]
+    C --> D["train_frequency: GLMs and LightGBM, offset = log exposure"]
+    C --> E["train_severity: Gamma GLM, ridge, LightGBM, claims only"]
+    D --> F["generate_predictions: frequency x severity"]
+    E --> F
+    F --> G[("predictions.parquet")]
+    G --> H["evaluate_models, segment_uncertainty, large_loss_analysis"]
+    G --> I["build_database: DuckDB tables and SQL"]
+    G --> J["export_dashboard_data: Power BI CSVs"]
+    G --> K["export_frontend_data: JSON for React dashboard"]
+    D --> L[("MLflow runs")]
+    E --> L
+    G --> M["evaluate_test: once, guarded"]
+    M --> N["generate_insights: business report"]
+```
+
+## Quick start
+
+Declared support is Python 3.11+; the project was developed and verified on Python 3.13 (CI also uses 3.13). The dashboard needs Node 22.
+
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev]"
+pytest                                          # unit tests (no dataset needed)
+
+python -m scripts.prepare_data                  # downloads data to data/raw (git-ignored), builds splits
+python -m scripts.run_eda                       # EDA on the training split
+python -m scripts.train_frequency               # frequency models, validation metrics, MLflow runs
+python -m scripts.train_severity                # severity models, bootstrap vs a constant
+python -m scripts.generate_predictions          # expected-cost table for all splits
+python -m scripts.evaluate_models               # segment performance (validation)
+python -m scripts.segment_uncertainty           # bootstrap intervals for actual/expected
+python -m scripts.explain_models                # SHAP and GLM relativities
+python -m scripts.run_experiments               # monotone / GLM-boosted / Tweedie variants, PSI drift
+python -m scripts.large_loss_analysis           # cap-and-load analysis
+python -m scripts.build_database --query sql/analytics.sql   # DuckDB tables and example queries
+python -m scripts.export_dashboard_data         # Power BI tables (see reports/dashboard_data/README.md)
+python -m scripts.export_frontend_data          # JSON for the React dashboard
+python -m scripts.evaluate_test                 # FINAL test evaluation, run once (refuses a second run without --force)
+python -m scripts.generate_insights             # reports/business_insights.md
+```
+
+If the automatic download is blocked, fetch `freMTPL2freq.rda` and `freMTPL2sev.rda` from <https://github.com/dutangc/CASdatasets/tree/master/data> into `data/raw/`. Dashboard: `cd frontend && npm install && npm run dev` (see `frontend/README.md`). MLflow UI: `mlflow ui --backend-store-uri sqlite:///data/processed/mlflow.db`.
+
+## Data and data dictionary
+
+Source: R package CASdatasets (Dutang and Charpentier), French motor third-party liability portfolio, about 2011-2013; the package is GPL (>= 2) and the data are used here for research and education. Nothing from the raw data is committed. Details and limitations are in `data/README.md`.
+
+| Column | Meaning |
+|---|---|
+| `IDpol` | Policy id; links the frequency and severity files |
+| `ClaimNb` | Number of claims in the exposure period (outcome) |
+| `Exposure` | Policy exposure in years (values above 1 are data errors and are capped at 1) |
+| `VehPower`, `VehAge`, `DrivAge` | Vehicle power (ordered integer), vehicle age and driver age in years |
+| `BonusMalus` | Bonus-malus score: 50 best, 100 neutral, above 100 malus |
+| `VehBrand`, `VehGas` | Anonymised brand group (B1-B14) and fuel (Diesel / Regular) |
+| `Area`, `Density`, `Region` | Anonymised density area code (A-F), inhabitants per km2, French region |
+| `ClaimAmount` | Individual claim cost, one row per claim in the severity file (outcome) |
+
+Facts that shape the modelling: 677,991 policies; 96.3% have no claim; frequency 0.074 per exposure-year; claim counts match the severity rows exactly; severity is extremely heavy-tailed (the top 0.1% of claims carry about a quarter of all claim cost); the data has **no date column**, so no out-of-time holdout is possible.
+
+## Methodology
+
+- **Frequency.** Claim counts are modelled with exposure as a log offset (GLMs) or log initial score (LightGBM), so a policy observed for half a year has half the expected claims. Models: constant rate, Poisson GLM, Negative Binomial GLM, LightGBM Poisson. Pearson dispersion of 1.89 indicates overdispersion; the Negative Binomial model changes point predictions very little.
+- **Severity.** Modelled only on claims with a positive amount, so zero-claim policies never distort the conditional target. Models: constant mean, Gamma GLM (log link), claims-capped GLM, ridge Gamma GLM, LightGBM Gamma.
+- **Expected cost.** `frequency (per exposure-year) x severity (per claim)` for a full year, plus the cost over the exposure actually observed for comparison with actuals. Non-finite or negative outputs raise an error instead of being clipped.
+- **Split and leakage prevention.** A stratified random split by policy (60/20/20, seed fixed in `configs/config.yaml`) because there is no date to split on. Every policy is in exactly one split (asserted and tested); preprocessing and cap thresholds are learned on train only; actual outcomes live in separate columns from model inputs; the validation set drives early stopping and model selection; the test set was evaluated once after the choice was fixed, and `src/evaluation/holdout_guard.py` records that and blocks a repeat.
+- **Evaluation.** Poisson deviance, MAE and Gini for frequency; Gamma deviance, MAE and RMSE for severity; decile and quintile calibration; actual-to-expected ratios by segment and feature group; bootstrap intervals for metric differences and for A/E ratios, because claim costs are heavy-tailed and differences are often within noise.
+
+### Why GLMs matter, and when gradient boosting helps
+
+GLMs are the actuarial baseline because they are transparent (each factor has an auditable multiplicative relativity), stable on small data, easy to file with regulators and to explain to underwriters, and statistically principled for counts and positive amounts. Gradient boosting is worth its extra complexity only when held-out data show a reliable gain. In this project it did for **frequency**: LightGBM beat the Poisson GLM on test deviance (0.2374 vs 0.2412) and ranking (Gini 0.321 vs 0.288), with the gain statistically reliable, at the price of lower interpretability (SHAP instead of coefficients). It did **not** for the refinements tried on validation: a monotone-constrained model lost a small but real amount of accuracy, boosting on a GLM gave no gain, and a direct Tweedie pure-premium model lost to frequency x severity. For **severity**, with about 16,000 heavy-tailed claims and weak signal, boosting did not reliably beat a constant, and the simple regularised GLM was the sensible choice.
+
+## Repository structure
+
+```
+configs/config.yaml        paths, seed, features, split, model selection, MLflow settings
+data/README.md             dataset source, license, dictionary, limitations (raw data not committed)
+src/{data,features,models,evaluation,reporting,utils}/   loading and validation, split and preprocessing,
+                           frequency / severity / pricing / large-loss models, metrics, uncertainty, drift,
+                           holdout guard, dashboard and insights builders, config and MLflow helpers
+scripts/                   the pipeline commands listed in the quick start
+sql/{schema,analytics}.sql DuckDB tables, views and example queries
+notebooks/                 four executed notebooks (exploration, frequency, severity, evaluation)
+reports/                   result tables, figures, business_insights.md, Power BI tables
+frontend/                  React dashboard (Vite + Recharts)
+tests/                     pytest suite; .github/workflows/ci.yml runs lint, tests and the front-end build
+```
+
+## Responsible use and limitations
+
+French data from about 2011-2013 with no dates (no out-of-time validation, no inflation adjustment); a limited feature set; a small, heavy-tailed severity sample whose level is driven by a few extreme claims; association, not causation, in every driver analysis; and expected cost is a loss estimate, not a price. Rating factors such as age raise fairness and regulatory questions that this project does not address. Natural next steps: a credibility-weighted or fitted-tail large-loss treatment, dated data for out-of-time validation and monitoring, and fresh data to re-check the cost level.
+
+## Detailed validation results
+
+Results below are from the validation split, which was used for model selection and early stopping (final test results are in their own section). Commands and file names refer to the quick start above.
 
 Frequency models (actual run, `python -m scripts.train_frequency`; fit on train, scored on the validation split only, test untouched):
 
@@ -146,7 +254,6 @@ LightGBM is reliably better than both baselines on held-out data. Its Gini (0.32
 - Adding the load restores the training mean by construction, so cost A/E is 0.88 (interval includes 1.0), no better than the existing 0.925 once uncertainty is considered.
 - The load is **unstable**: one ~4.1M claim contributes 30-50% of the total excess, and dropping it would cut the load by roughly a third or more. I did not drop it (that would be tuning on an outcome); the practical conclusion is that a large-loss load estimated from this sample is unreliable and would need credibility weighting, a fitted tail distribution (e.g. Pareto) or reinsurance-style treatment before pricing use. The model selection is unchanged.
 
-Not yet implemented: dashboard exports, notebooks.
 All model results above are validation results used for model selection; final test-set results are reported in their own section.
 
 Data checks and EDA findings (from actual runs, train split only):
@@ -157,5 +264,4 @@ Data checks and EDA findings (from actual runs, train split only):
 - Severity is heavy-tailed: median 1,172, p99.9 156,057, max 4,075,401; the top 0.1% of claims make up 25.9% of total claim amount.
 - Train/val/test frequencies are close (0.0738 / 0.0734 / 0.0741). See `reports/eda_summary.txt` and `reports/figures/`.
 
-Run: `pip install -e .[dev]`, `python -m scripts.prepare_data`, `python -m scripts.run_eda`, `python -m scripts.train_frequency`, `python -m scripts.train_severity`, `python -m scripts.generate_predictions`, `python -m scripts.evaluate_models`, `python -m scripts.segment_uncertainty`, `python -m scripts.large_loss_analysis`, `python -m scripts.evaluate_test` (once), `python -m scripts.build_database`, `python -m scripts.explain_models`, `python -m scripts.run_experiments`, `pytest`.
 See `data/README.md` for dataset source, license and limitations.
