@@ -106,6 +106,10 @@ These are statistical associations in observational data, not causal effects. Bo
 
 Takeaway: on this data the plain two-part LightGBM x ridge-GLM pipeline is hard to beat with these refinements, and the constraint is an explainability-for-accuracy trade, not a free improvement. Outputs: `reports/frequency_variants_validation.csv`, `reports/pure_premium_variants_validation.csv`, `reports/drift_psi_train_vs_val.csv`.
 
+## Notebooks
+
+`notebooks/` holds four executed notebooks with the results saved in them: `01_data_exploration` (train split only; validation and test are inspected for risk features only), `02_frequency_modeling` and `03_severity_modeling` (fit on train, compared on validation, never reading the test split), and `04_model_evaluation` (reads only the saved result tables, including the one-time test results, and never refits). `tests/test_notebooks.py` checks that each notebook is executed and error-free and enforces those holdout rules, so a notebook cannot quietly start using the test set. Re-run them with `jupyter nbconvert --to notebook --execute --inplace notebooks/<name>.ipynb` after the pipeline scripts.
+
 ## Front-end dashboard (React)
 
 A React dashboard lives in `frontend/` (branch `frontend`): five tabs covering the executive overview, risk analysis, model performance, risk drivers and monitoring. It reads aggregates exported by `python -m scripts.export_frontend_data` (validation split only) and is covered by front-end tests and a CI workflow (`.github/workflows/ci.yml`). See `frontend/README.md`.
