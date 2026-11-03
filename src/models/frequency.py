@@ -113,10 +113,17 @@ class LightGBMFrequency:
 
     The booster models log(rate); predicted counts = exp(raw score) * exposure, so predictions scale
     exactly with exposure like the GLM. Categorical levels are fixed from training data.
+
+    With ``init_at_portfolio_rate=False`` (the default, used for every reported result) boosting starts from a
+    rate of 1.0 claim per exposure-year and the first trees must learn the intercept; if early stopping fires
+    before it settles, predictions are biased slightly high. ``init_at_portfolio_rate=True`` starts from the
+    training portfolio rate instead (the same model class, a better starting point). It is opt-in because
+    changing the default would alter results that were already evaluated on the held-out test set.
     """
 
-    def __init__(self, cfg: dict, params: dict | None = None):
+    def __init__(self, cfg: dict, params: dict | None = None, init_at_portfolio_rate: bool = False):
         self.cfg = cfg
+        self.init_at_portfolio_rate = init_at_portfolio_rate
         self.params = {"objective": "poisson", "learning_rate": 0.05, "num_leaves": 16, "min_child_samples": 200,
                        "subsample": 0.8, "subsample_freq": 1, "colsample_bytree": 0.8, "reg_lambda": 5.0,
                        "n_estimators": 2000, "random_state": cfg["seed"], "n_jobs": 4, "verbose": -1}
@@ -134,11 +141,14 @@ class LightGBMFrequency:
         validate_exposure(train)
         validate_exposure(val)
         self.levels_ = {c: sorted(train[c].astype(str).unique()) for c in self.cfg["features"]["categorical"]}
+        self.base_log_rate_ = (
+            float(np.log(train["ClaimNb"].sum() / train["Exposure"].sum())) if self.init_at_portfolio_rate else 0.0)
         self.model_ = lgb.LGBMRegressor(**self.params)
         self.model_.fit(
-            self._x(train), train["ClaimNb"].to_numpy(float), init_score=np.log(train["Exposure"].to_numpy(float)),
+            self._x(train), train["ClaimNb"].to_numpy(float),
+            init_score=np.log(train["Exposure"].to_numpy(float)) + self.base_log_rate_,
             eval_set=[(self._x(val), val["ClaimNb"].to_numpy(float))],
-            eval_init_score=[np.log(val["Exposure"].to_numpy(float))],
+            eval_init_score=[np.log(val["Exposure"].to_numpy(float)) + self.base_log_rate_],
             callbacks=[lgb.early_stopping(50, verbose=False)])
         self.best_iteration_ = int(self.model_.best_iteration_)
         return self
@@ -146,4 +156,4 @@ class LightGBMFrequency:
     def predict_counts(self, df: pd.DataFrame) -> np.ndarray:
         validate_exposure(df)
         raw = self.model_.predict(self._x(df), raw_score=True)
-        return np.exp(raw) * df["Exposure"].to_numpy(float)
+        return np.exp(raw + self.base_log_rate_) * df["Exposure"].to_numpy(float)
