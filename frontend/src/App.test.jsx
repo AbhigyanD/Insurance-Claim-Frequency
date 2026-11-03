@@ -1,20 +1,10 @@
-import { readFileSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
-import { dirname, join } from 'node:path'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
 import { DATASETS } from './data'
+import { loadData as load, stubFetch } from './testUtils'
 
-const dataDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'public', 'data')
-const load = (name) => JSON.parse(readFileSync(join(dataDir, `${name}.json`), 'utf8'))
-
-beforeEach(() => {
-  vi.stubGlobal('fetch', vi.fn(async (url) => {
-    const name = String(url).split('/').pop().replace('.json', '')
-    return { ok: DATASETS.includes(name), status: DATASETS.includes(name) ? 200 : 404, json: async () => load(name) }
-  }))
-})
+beforeEach(() => stubFetch())
 afterEach(() => {
   cleanup()
   vi.unstubAllGlobals()
