@@ -42,6 +42,12 @@ def _read_rda(path: Path) -> pd.DataFrame:
     """
     import rdata
     df = next(iter(rdata.conversion.convert(rdata.parser.parse_file(str(path))).values()))
+    return coerce_columns(df)
+
+
+def coerce_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """R factors become plain strings, integers int64 and everything else float64."""
+    df = df.copy()
     df.columns = [str(c) for c in df.columns]
     out = pd.DataFrame(index=df.index)
     for c in df.columns:
@@ -55,16 +61,24 @@ def _read_rda(path: Path) -> pd.DataFrame:
     return out.reset_index(drop=True)
 
 
+def normalize_ids(df: pd.DataFrame, id_col: str) -> pd.DataFrame:
+    """Parse policy ids to int64.
+
+    R stores IDpol as a factor in the severity file with labels such as "1e+05" (= 100000), so ids are
+    parsed via numeric rather than int(). Raises if any id is not a whole number.
+    """
+    ids = pd.to_numeric(df[id_col])
+    if not (ids == ids.round()).all():
+        raise ValueError("Non-integer policy ids after parsing")
+    out = df.copy()
+    out[id_col] = ids.astype("int64")
+    return out
+
+
 def load_raw(cfg: dict | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
     cfg = cfg or load_config()
     paths = download(cfg)
     freq, sev = _read_rda(paths["freq"]), _read_rda(paths["sev"])
     id_col = cfg["data"]["id_col"]
-    # R stores IDpol as a factor in the sev file with labels such as "1e+05" (= 100000),
-    # so parse via numeric rather than int().
-    for d in (freq, sev):
-        ids = pd.to_numeric(d[id_col])
-        if not (ids == ids.round()).all():
-            raise ValueError("Non-integer policy ids after parsing")
-        d[id_col] = ids.astype("int64")
+    freq, sev = normalize_ids(freq, id_col), normalize_ids(sev, id_col)
     return freq, sev

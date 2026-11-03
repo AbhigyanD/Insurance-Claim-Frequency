@@ -23,8 +23,8 @@ jobs:
         run: pip install -e ".[dev]"
       - name: Lint
         run: ruff check .
-      - name: Run tests
-        run: pytest -q
+      - name: Run tests with coverage
+        run: pytest -q --cov=src --cov-fail-under=95
 
   frontend:
     name: Front end (test and build)

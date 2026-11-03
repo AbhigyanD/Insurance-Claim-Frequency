@@ -9,7 +9,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "nbformat", "ruff"]
+dev = ["pytest", "pytest-cov", "nbformat", "ruff"]
 
 [tool.setuptools.packages.find]
 include = ["src*"]
